@@ -10,6 +10,7 @@ import Profile from "./pages/user/Profile.jsx";
 
 import Dashboard from "./pages/admin/Dashboard.jsx";
 import Users from "./pages/admin/Users.jsx";
+import PredefinedOutfits from "./pages/admin/PredefinedOutfits.jsx";
 
 import ProtectedRoute from "./routes/ProtectedRoute.jsx";
 import AdminRoute from "./routes/AdminRoute.jsx";
@@ -34,7 +35,10 @@ export default function App() {
           </Route>
             <Route element={<AdminRoute />}>
             <Route path="/admin" element={<Dashboard />} />
-
+            <Route
+              path="/admin/predefined-outfits"
+              element={<PredefinedOutfits />}
+            />
             <Route
               path="/admin/users"
               element={<Users />}

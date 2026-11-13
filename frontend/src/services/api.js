@@ -1,4 +1,3 @@
-
 import axios from "axios";
 
 const api = axios.create({
@@ -38,3 +37,15 @@ api.interceptors.response.use(
 export default api;
 
 
+export async function uploadAdminImage(file) {
+  const formData = new FormData();
+  formData.append("image", file);
+
+  const response = await api.post("/images/upload", formData, {
+    headers: {
+      "Content-Type": undefined,
+    },
+  });
+
+  return response.data.data;
+}
