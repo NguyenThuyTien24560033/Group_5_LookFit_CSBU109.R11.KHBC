@@ -1,0 +1,73 @@
+
+.home-page {
+  width: min(1200px, 100%);
+  margin: 0 auto;
+  padding: 32px 20px;
+}
+
+.home-hero {
+  padding: 36px 0;
+}
+
+.home-hero h1 {
+  margin-bottom: 8px;
+}
+
+.public-outfits {
+  margin-top: 24px;
+}
+
+.outfit-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.public-outfit-card {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+}
+
+.public-outfit-items {
+  display: grid;
+  gap: 14px;
+}
+
+.public-outfit-item img {
+  display: block;
+  width: 100%;
+  max-width: 240px;
+  max-height: 260px;
+  object-fit: contain;
+  border-radius: 6px;
+}
+
+.no-image {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.home-error {
+  color: #b91c1c;
+}
+
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin: 28px 0;
+}
+
+.pagination-controls button {
+  padding: 8px 14px;
+  cursor: pointer;
+}
+
+.pagination-controls button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
