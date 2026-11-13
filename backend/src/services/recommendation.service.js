@@ -14,7 +14,15 @@ import {
   calculateLifestyleCompatibility,
 } from "./contextCompatibility.service.js";
 
+export async function getRecommendationData(userId) {
+  const profile = await UserProfile.findOne({ userId }).lean();
 
+  if (!profile) {
+    throw new HttpError(404, "User profile not found");
+  }
+
+  return profile;
+}
 
 export async function getCatalogItems() {
   return CatalogItem.find({ isActive: true }).lean();
@@ -80,3 +88,26 @@ function calculateOutfitColorScore(items) {
   return pairCount === 0 ? 0 : score / pairCount;
 }
 
+
+export async function recommendOutfitsForProfile(
+  profile,
+  criteria,
+  page = 1,
+  pageSize = 4
+) {
+  const items = await getCatalogItems();
+  const recommendedItems = filterRecommendedItems(items, profile, criteria);
+
+  return buildOutfits(recommendedItems, page, pageSize);
+}
+
+export async function recommendOutfits(
+  userId,
+  criteria,
+  page = 1,
+  pageSize = 4
+) {
+  const profile = await getRecommendationData(userId);
+
+  return recommendOutfitsForProfile(profile, criteria, page, pageSize);
+}
