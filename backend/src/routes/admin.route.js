@@ -15,6 +15,7 @@ import {
 
 const router = express.Router();
 
+
 router.get(
   "/dashboard",
   authenticate,
@@ -32,6 +33,7 @@ router.get(
     }
   }
 );
+
 
 router.get(
   "/users",
@@ -55,6 +57,7 @@ router.get(
     }
   }
 );
+
 
 router.get(
   "/catalog",

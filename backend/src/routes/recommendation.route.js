@@ -4,6 +4,7 @@ import { authenticate } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
+
 router.post("/", authenticate, async (req, res, next) => {
   try {
     const {

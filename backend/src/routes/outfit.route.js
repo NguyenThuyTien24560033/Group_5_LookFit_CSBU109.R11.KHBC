@@ -14,6 +14,24 @@ import {
 
 const router = express.Router();
 
+
+router.get("/public", async (req, res, next) => {
+  try {
+    const result = await getPublicOutfits({
+      page: req.query.page,
+      pageSize: req.query.pageSize,
+    });
+
+    return res.status(200).json({
+      outfits: result.outfits,
+      pagination: result.pagination,
+    });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+
 router.get("/public/featuring/:catalogId", async (req, res, next) => {
   try {
     const result = await getPublicOutfitsFeaturingItem({
@@ -36,6 +54,7 @@ router.get("/public/featuring/:catalogId", async (req, res, next) => {
 
 // All routes below require authentication.
 router.use(authenticate);
+
 
 router.get("/history", async (req, res, next) => {
   try {
@@ -75,6 +94,7 @@ router.get("/:id", async (req, res, next) => {
     return next(error);
   }
 });
+
 
 router.patch("/:id/items", async (req, res, next) => {
   try {

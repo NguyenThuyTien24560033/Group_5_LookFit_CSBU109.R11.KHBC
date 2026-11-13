@@ -12,7 +12,6 @@ import HttpError from "../utils/httpError.js";
 
 const router = express.Router();
 
-
 router.post("/register", async (req, res, next) => {
   try {
     const result = await registerUser(req.body);
@@ -25,6 +24,7 @@ router.post("/register", async (req, res, next) => {
     return next(error);
   }
 });
+
 
 router.post("/login", async (req, res, next) => {
   try {
@@ -39,11 +39,13 @@ router.post("/login", async (req, res, next) => {
   }
 });
 
+
 router.post("/logout", (req, res) => {
   return res.status(200).json({
     message: "Logout successful. Please remove your token on the client.",
   });
 });
+
 
 router.get(
   "/admin-test",
@@ -55,6 +57,7 @@ router.get(
     });
   }
 );
+
 
 router.get("/me", authenticate, async (req, res, next) => {
   try {
