@@ -1,3 +1,4 @@
+
 export function calculateCaseCompatibility(itemCases, userCase) {
   if (!Array.isArray(itemCases) || !userCase) return 0;
   return itemCases.includes(userCase) ? 1 : 0;

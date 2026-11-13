@@ -1,3 +1,4 @@
+
 export function calculateBodyShapeCompatibility(itemShapes, bodyShape) {
   if (!Array.isArray(itemShapes) || !bodyShape) {
     return 0;
