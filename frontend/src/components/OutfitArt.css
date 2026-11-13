@@ -1,0 +1,141 @@
+
+.hero-illustration {
+  position: relative;
+  width: min(100%, 480px);
+  aspect-ratio: 1;
+  margin: 0 auto;
+  display: grid;
+  place-items: center;
+  isolation: isolate;
+}
+
+.hero-illustration__orbits {
+  position: absolute;
+  inset: 7%;
+  border: 1px solid #ead8d0;
+  border-radius: 50%;
+}
+
+.hero-illustration__orbits span {
+  position: absolute;
+  border: 1px solid #ead8d0;
+  border-radius: 50%;
+}
+
+.hero-illustration__orbits span:nth-child(1) {
+  inset: 3%;
+}
+
+.hero-illustration__orbits span:nth-child(2) {
+  inset: 10%;
+}
+
+.hero-illustration__orbits span:nth-child(3) {
+  inset: 18%;
+}
+
+.hero-illustration__orbits i {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  background: #3672bf;
+  border-radius: 50%;
+}
+
+.hero-illustration__orbits i:nth-of-type(1) {
+  top: 24%;
+  left: 6%;
+}
+
+.hero-illustration__orbits i:nth-of-type(2) {
+  bottom: 9%;
+  left: 24%;
+}
+
+.hero-illustration__orbits i:nth-of-type(3) {
+  bottom: 24%;
+  right: 4%;
+}
+
+.hero-illustration__orbits i:nth-of-type(4) {
+  top: 14%;
+  right: 18%;
+}
+
+.hero-illustration__circle {
+  position: absolute;
+  width: 58%;
+  height: 58%;
+  border-radius: 50%;
+  background: #f1dfe5;
+  z-index: 0;
+}
+
+.hero-illustration__circle::after {
+  content: "";
+  position: absolute;
+  inset: 22% 0;
+  border-radius: 50%;
+  background: #dfb7bf;
+}
+
+.hero-illustration__dress {
+  position: relative;
+  z-index: 1;
+  width: 45%;
+  height: 52%;
+  object-fit: contain;
+}
+
+.hero-illustration__mood,
+.hero-illustration__match {
+  position: absolute;
+  z-index: 2;
+  background: #fffdfb;
+  border: 1px solid #eaded6;
+  border-radius: 11px;
+  box-shadow: 0 12px 28px rgba(66, 40, 40, 0.06);
+}
+
+.hero-illustration__mood {
+  left: 5%;
+  bottom: 13%;
+  padding: 16px 20px;
+}
+
+.hero-illustration__mood span {
+  display: block;
+  font-size: 11px;
+  color: #9b8884;
+  margin-bottom: 8px;
+}
+
+.hero-illustration__mood strong {
+  display: block;
+  font-family: Georgia, serif;
+  font-size: 16px;
+  font-weight: 400;
+  color: #2b2623;
+}
+
+.hero-illustration__match {
+  top: 15%;
+  right: 3%;
+  padding: 15px 18px;
+  color: #a25f69;
+  font-size: 11px;
+}
+
+@media (max-width: 768px) {
+  .hero-illustration {
+    width: min(100%, 380px);
+  }
+
+  .hero-illustration__mood {
+    padding: 12px 14px;
+  }
+
+  .hero-illustration__match {
+    padding: 10px 12px;
+  }
+}
