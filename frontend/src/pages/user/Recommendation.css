@@ -1,0 +1,86 @@
+.recommendation-page {
+  width: min(900px, 100%);
+  margin: 0 auto;
+  padding: 32px 20px;
+}
+
+.recommendation-card {
+  padding: 24px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.recommendation-card h1 {
+  margin-top: 0;
+}
+
+.recommendation-description {
+  margin-bottom: 24px;
+  color: #6b7280;
+}
+
+.recommendation-form {
+  display: grid;
+  gap: 18px;
+  margin-top: 24px;
+}
+
+.recommendation-field {
+  display: grid;
+  gap: 7px;
+}
+
+.recommendation-field label {
+  font-weight: 600;
+}
+
+.recommendation-field select {
+  width: 100%;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #111827;
+}
+
+.recommendation-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.recommendation-actions button {
+  padding: 10px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #f9fafb;
+  color: #111827;
+  cursor: pointer;
+}
+
+.recommendation-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.recommendation-message {
+  margin-top: 18px;
+  overflow-wrap: anywhere;
+}
+
+.recommendation-message--error {
+  color: #b91c1c;
+}
+
+@media (max-width: 600px) {
+  .recommendation-page {
+    padding: 20px 12px;
+  }
+
+  .recommendation-card {
+    padding: 18px;
+  }
+}
