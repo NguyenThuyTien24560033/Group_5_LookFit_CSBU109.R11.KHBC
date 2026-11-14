@@ -199,16 +199,18 @@ export default function Reviews() {
         </div>
 
         {/* INFINITE TESTIMONIAL MARQUEE */}
-        {/* CALL TO ACTION */}
-<div className="testimonial-cta">
-  <p>
-    Ready to make getting dressed feel more like you?
-  </p>
 
-  <Link className="primary-button" to="/login">
-    Begin your style journey
-    <ArrowRight size={16} />
-  </Link>
+<div className="testimonial-infinite">
+  <div className="testimonial-marquee">
+    {[...testimonials, ...testimonials].map(
+      (review, index) => (
+        <TestimonialCard
+          key={`marquee-${index}`}
+          review={review}
+        />
+      )
+    )}
+  </div>
 </div>
 
         {/* LEGACY CAROUSEL */}
@@ -269,6 +271,7 @@ export default function Reviews() {
             />
           ))}
         </div>
+        
 
         {/* CALL TO ACTION */}
         <div className="testimonial-cta">
@@ -276,13 +279,14 @@ export default function Reviews() {
             Ready to make getting dressed feel more like you?
           </p>
 
-     <Link className="primary-button" to="/login">
-         Begin your style journey
-    <ArrowRight size={16} />
-    </Link>
+          <Link to="/login" className="primary-button">
+            Begin your style journey
+            <ArrowRight size={16} />
+          </Link>
         </div>
 
-      </div>
+      </div> {/* Đóng .container */}
     </section>
   );
 }
+
