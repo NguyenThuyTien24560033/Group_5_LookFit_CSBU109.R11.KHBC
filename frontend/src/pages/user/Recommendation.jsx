@@ -1,7 +1,9 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { getRecommendations } from "../../services/recommendation.service.js";
-import './Recommendation.css'
+import "./Recommendation.css";
 
 const initialCriteria = {
   case: "casual",
@@ -137,37 +139,101 @@ function Recommendation() {
   ];
 
   return (
-    <main>
-      <h1>Outfit Recommendations</h1>
-      <p>Choose your preferences to find matching outfits.</p>
+    <main className="recommendation-page">
+      <div className="recommendation-container">
 
-      <form onSubmit={handleSubmit}>
-        {fields.map((field) => (
-          <div key={field.name}>
-            <label htmlFor={field.name}>{field.label}: </label>
+        {/* BACK BUTTON */}
+        <button
+          type="button"
+          className="recommendation-back"
+          onClick={() => navigate("/home")}
+        >
+          <ArrowLeft size={18} />
+          <span>Back</span>
+        </button>
 
-            <select
-              id={field.name}
-              name={field.name}
-              value={criteria[field.name]}
-              onChange={handleChange}
+        {/* PAGE HEADING */}
+        <div className="recommendation-heading">
+          <p className="recommendation-eyebrow">
+            PERSONAL STYLING <span>•</span> LOOKFIT
+          </p>
+
+          <h1>
+            Find your next{" "}
+            <em>favorite outfit.</em>
+          </h1>
+
+          <p className="recommendation-subtitle">
+            Tell us a little about your day and we'll curate
+            looks that fit the moment.
+          </p>
+        </div>
+
+        {/* RECOMMENDATION FORM */}
+        <form
+          onSubmit={handleSubmit}
+          className="recommendation-form"
+        >
+          <div className="recommendation-fields">
+            {fields.map((field) => (
+              <div
+                key={field.name}
+                className="recommendation-field"
+              >
+                <label htmlFor={field.name}>
+                  {field.label}
+                </label>
+
+                <select
+                  id={field.name}
+                  name={field.name}
+                  value={criteria[field.name]}
+                  onChange={handleChange}
+                  disabled={loading}
+                >
+                  {field.options.map(([value, label]) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ))}
+          </div>
+
+          {/* SUBMIT BUTTON */}
+          <div className="recommendation-form-footer">
+            <button
+              type="submit"
+              className="recommendation-submit"
               disabled={loading}
             >
-              {field.options.map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
+              {loading ? (
+                "Finding outfits..."
+              ) : (
+                <>
+                  Find Outfits
+                  <ArrowRight size={18} />
+                </>
+              )}
+            </button>
           </div>
-        ))}
 
-        <button type="submit" disabled={loading}>
-          {loading ? "Finding outfits..." : "Find Outfits"}
-        </button>
-      </form>
+          {/* ERROR MESSAGE */}
+          {message && (
+            <p
+              className="recommendation-message"
+              role="alert"
+            >
+              {message}
+            </p>
+          )}
+        </form>
 
-      {message && <p role="alert">{message}</p>}
+
+  
+
+      </div>
     </main>
   );
 }
