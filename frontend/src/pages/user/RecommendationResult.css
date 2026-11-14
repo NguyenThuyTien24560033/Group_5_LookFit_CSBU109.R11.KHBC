@@ -910,3 +910,95 @@
     margin: 24px auto;
   }
 }
+
+
+/* =========================================
+   LOOKFIT - RECOMMENDATION RESULT ALIGNMENT
+   Match Profile & History page layout
+========================================= */
+
+/* Page background and spacing */
+.result-page {
+  width: 100%;
+  min-height: calc(100vh - 90px);
+  padding: 30px 0 80px;
+  box-sizing: border-box;
+}
+
+/* Align page content with Profile */
+.result-container {
+  width: calc(100% - 48px);
+  max-width: 1320px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+/* Back button - same style as Profile */
+.result-page .result-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+
+  width: auto;
+  min-width: 100px;
+  padding: 12px 20px;
+  margin: 0 0 28px;
+
+  background: #ffffff;
+  border: 1px solid #efd3c5;
+  border-radius: 11px;
+
+  color: #a66b59;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.4;
+
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(115, 73, 58, 0.06);
+  transition: all 0.2s ease;
+}
+
+.result-page .result-back:hover:not(:disabled) {
+  background: #fff8f5;
+  border-color: #e4bda9;
+  box-shadow: 0 5px 12px rgba(115, 73, 58, 0.1);
+  transform: translateY(-1px);
+}
+
+.result-page .result-back:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Header alignment */
+.result-header {
+  width: 100%;
+  margin-bottom: 30px;
+}
+
+.result-header h1 {
+  margin-top: 10px;
+}
+
+/* Keep the recommendation cards aligned */
+.result-grid {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .result-page {
+    padding: 24px 0 60px;
+  }
+
+  .result-container {
+    width: calc(100% - 32px);
+  }
+
+  .result-page .result-back {
+    margin-bottom: 24px;
+  }
+}
+
