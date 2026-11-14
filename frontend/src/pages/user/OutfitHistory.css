@@ -955,3 +955,122 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+/* LOOKFIT - DELETE CONFIRMATION POPUP */
+
+.history-delete-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(30, 25, 29, 0.48);
+  backdrop-filter: blur(3px);
+}
+
+.history-delete-modal {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 420px;
+  padding: 30px 28px 24px;
+  background: #fff;
+  border: 1px solid #d6a4b8;
+  border-radius: 14px;
+  box-shadow: 0 20px 55px rgba(35, 20, 30, 0.2);
+  text-align: center;
+  animation: history-delete-appear 0.2s ease-out;
+}
+
+.history-delete-icon {
+  width: 66px;
+  height: 66px;
+  margin: 0 auto 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ba6888, #924761);
+  color: #fff;
+}
+
+.history-delete-modal h2 {
+  margin: 0 0 12px;
+  color: #292326;
+  font-size: 23px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.history-delete-modal p {
+  max-width: 340px;
+  margin: 0 auto 24px;
+  color: #746a70;
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.history-delete-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.history-delete-actions button {
+  min-height: 44px;
+  border-radius: 7px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.history-delete-cancel {
+  background: #fff;
+  color: #3d3339;
+  border: 1px solid #d8d2d5;
+}
+
+.history-delete-cancel:hover:not(:disabled) {
+  background: #f8f4f6;
+}
+
+.history-delete-confirm {
+  background: #b4507e;
+  color: #fff;
+  border: 1px solid #b4507e;
+}
+
+.history-delete-confirm:hover:not(:disabled) {
+  background: #993d68;
+}
+
+.history-delete-actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@keyframes history-delete-appear {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 480px) {
+  .history-delete-modal {
+    padding: 26px 20px 22px;
+  }
+
+  .history-delete-modal h2 {
+    font-size: 21px;
+  }
+}
+

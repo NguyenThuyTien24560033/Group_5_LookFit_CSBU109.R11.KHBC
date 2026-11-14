@@ -1002,3 +1002,104 @@
   }
 }
 
+
+/* ==========================================
+   LOOKFIT - RESULT PAGE SPACING FIX
+========================================== */
+
+/* 1. Move heading and outfit cards upward */
+.result-page .result-back {
+  margin-bottom: 8px;
+}
+
+.result-page .result-header {
+  margin-top: 0;
+  margin-bottom: 30px;
+}
+
+/* 2. Move pagination slightly downward */
+.result-page .result-pagination {
+  margin-top: 36px;
+  margin-bottom: 30px;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .result-page .result-back {
+    margin-bottom: 12px;
+  }
+
+  .result-page .result-pagination {
+    margin-top: 28px;
+  }
+}
+
+
+/* =====================================
+   LOWER PAGINATION - LOOKFIT
+===================================== */
+
+.result-page .result-pagination {
+  margin-top: 70px !important;
+  margin-bottom: 30px;
+  padding-top: 0;
+  transform: none;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .result-page .result-pagination {
+    margin-top: 40px !important;
+  }
+}
+
+
+/* ==========================================
+   LOOKFIT - BALANCED RESULT PAGE
+========================================== */
+
+/* Natural page height */
+.result-page {
+  min-height: calc(100vh - 90px);
+  padding-bottom: 40px;
+}
+
+/* Keep outfit cards unchanged */
+.result-page .result-grid {
+  margin-bottom: 0;
+}
+
+/* Balanced pagination spacing */
+.result-page .result-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+
+  margin-top: 28px !important;
+  margin-bottom: 0 !important;
+  padding: 0;
+
+  position: static;
+  transform: none;
+}
+
+/* Align pagination text with buttons */
+.result-page .result-pagination span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.4;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .result-page {
+    padding-bottom: 30px;
+  }
+
+  .result-page .result-pagination {
+    margin-top: 24px !important;
+    gap: 12px;
+  }
+}

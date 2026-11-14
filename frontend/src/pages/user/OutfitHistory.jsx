@@ -1,7 +1,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Eye, X, ArrowRight } from "lucide-react";
+import { Eye, X, ArrowRight, Trash2 } from "lucide-react";
 
 import {
   getOutfitHistory,
@@ -189,6 +189,7 @@ export default function OutfitHistory() {
   );
   const [isError, setIsError] = useState(false);
 
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const [selectedOutfit, setSelectedOutfit] = useState(null);
 
   const [editingOutfit, setEditingOutfit] = useState(null);
@@ -240,7 +241,7 @@ export default function OutfitHistory() {
   // =========================
 
   useEffect(() => {
-    if (!selectedOutfit && !editingOutfit) return;
+    if (!selectedOutfit && !editingOutfit && !deleteTarget) return;
 
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -248,7 +249,9 @@ export default function OutfitHistory() {
     const handleEscape = (event) => {
       if (event.key !== "Escape") return;
 
-      if (editingOutfit && !editSaving) {
+      if (deleteTarget && processingId === null) {
+        setDeleteTarget(null);
+      } else if (editingOutfit && !editSaving) {
         setEditingOutfit(null);
         setEditMessage("");
       } else if (selectedOutfit) {
@@ -262,7 +265,7 @@ export default function OutfitHistory() {
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", handleEscape);
     };
-  }, [selectedOutfit, editingOutfit, editSaving]);
+  }, [selectedOutfit, editingOutfit, editSaving, deleteTarget, processingId]);
 
   // =========================
   // EDIT MODAL
@@ -571,16 +574,11 @@ export default function OutfitHistory() {
   // DELETE
   // =========================
 
-  const handleDelete = async (outfit) => {
-    const id = getOutfitId(outfit);
+  const handleDelete = async () => {
+    if (!deleteTarget || processingId !== null) return;
 
-    if (id == null || processingId !== null) return;
-
-    if (
-      !window.confirm(
-        "Are you sure you want to delete this outfit?"
-      )
-    ) return;
+    const id = getOutfitId(deleteTarget);
+    if (id == null) return;
 
     setProcessingId(id);
     setMessage("");
@@ -589,10 +587,8 @@ export default function OutfitHistory() {
     try {
       if (PREVIEW_MODE) {
         const updated = readPreview().filter(
-          (entry) =>
-            String(getOutfitId(entry)) !== String(id)
+          (entry) => String(getOutfitId(entry)) !== String(id)
         );
-
         writePreview(updated);
         setOutfits(updated);
       } else {
@@ -601,12 +597,11 @@ export default function OutfitHistory() {
       }
 
       setSelectedOutfit(null);
+      setDeleteTarget(null);
       setMessage("Outfit deleted successfully.");
     } catch (error) {
       setIsError(true);
-      setMessage(
-        error?.message || "Unable to delete outfit."
-      );
+      setMessage(error?.message || "Unable to delete outfit.");
     } finally {
       setProcessingId(null);
     }
@@ -865,7 +860,7 @@ export default function OutfitHistory() {
                         type="button"
                         className="history-action-delete"
                         disabled={processingId !== null}
-                        onClick={() => handleDelete(outfit)}
+                        onClick={() => setDeleteTarget(outfit)}
                       >
                         {processing
                           ? "Processing..."
@@ -1212,6 +1207,53 @@ export default function OutfitHistory() {
               >
                 Find a similar look
                 <ArrowRight size={17} />
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
+
+      {/* DELETE CONFIRMATION MODAL */}
+      {deleteTarget && (
+        <div
+          className="history-delete-overlay"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget && processingId === null) {
+              setDeleteTarget(null);
+            }
+          }}
+        >
+          <section
+            className="history-delete-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="history-delete-title"
+            aria-describedby="history-delete-description"
+          >
+            <div className="history-delete-icon">
+              <Trash2 size={28} strokeWidth={1.8} />
+            </div>
+            <h2 id="history-delete-title">Delete this outfit?</h2>
+            <p id="history-delete-description">
+              Are you sure you want to remove this outfit from your history?
+              This action cannot be undone.
+            </p>
+            <div className="history-delete-actions">
+              <button
+                type="button"
+                className="history-delete-cancel"
+                onClick={() => setDeleteTarget(null)}
+                disabled={processingId !== null}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="history-delete-confirm"
+                onClick={handleDelete}
+                disabled={processingId !== null}
+              >
+                {processingId !== null ? "Deleting..." : "Delete Now"}
               </button>
             </div>
           </section>
