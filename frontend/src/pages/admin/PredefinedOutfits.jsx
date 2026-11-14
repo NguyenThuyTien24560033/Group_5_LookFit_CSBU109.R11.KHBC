@@ -1,7 +1,7 @@
-import { useState } from "react";
-import api from "../../services/api.js";
-import "./PredefinedOutfits.css";
 
+import { useState } from "react";
+import "./PredefinedOutfits.css";
+import AdminLayout from "../../components/layout/Adminlayout.jsx";
 const FIELDS = [
   {
     key: "case",
@@ -79,7 +79,7 @@ const FIELDS = [
     ],
   },
 ];
-
+const DEMO_MODE = true;
 const INITIAL_CRITERIA = {
   case: "casual",
   style: "basic",
@@ -88,146 +88,301 @@ const INITIAL_CRITERIA = {
   lifestyle: "student",
 };
 
-function getId(item) {
-  return item?._id ?? item?.id;
+const DEMO_ITEMS = [
+  {
+    name: "Classic White Shirt",
+    category: "Top",
+    color: "White",
+    emoji: "👔",
+  },
+  {
+    name: "Straight Leg Jeans",
+    category: "Bottom",
+    color: "Blue",
+    emoji: "👖",
+  },
+  {
+    name: "Minimal Sneakers",
+    category: "Shoes",
+    color: "White",
+    emoji: "👟",
+  },
+  {
+    name: "Everyday Tote Bag",
+    category: "Accessory",
+    color: "Beige",
+    emoji: "👜",
+  },
+  {
+    name: "Casual Jacket",
+    category: "Outerwear",
+    color: "Brown",
+    emoji: "🧥",
+  },
+  {
+    name: "Summer Dress",
+    category: "Dress",
+    color: "Pink",
+    emoji: "👗",
+  },
+];
+
+function createMockOutfits(criteria) {
+  const bodyShapes = [
+    "Hourglass",
+    "Pear",
+    "Rectangle",
+  ];
+
+  return bodyShapes.map((shape, index) => {
+    const items = [
+      DEMO_ITEMS[(index * 2) % DEMO_ITEMS.length],
+      DEMO_ITEMS[(index * 2 + 1) % DEMO_ITEMS.length],
+      DEMO_ITEMS[(index * 2 + 2) % DEMO_ITEMS.length],
+    ];
+
+    return {
+      id: `demo-${Date.now()}-${index}`,
+      bodyShape: shape,
+      ...criteria,
+      items,
+    };
+  });
+}
+
+function getLabel(key, value) {
+  const field = FIELDS.find((item) => item.key === key);
+  const option = field?.options.find(([id]) => id === value);
+  return option?.[1] ?? value;
 }
 
 export default function PredefinedOutfits() {
-  const [criteria, setCriteria] = useState(INITIAL_CRITERIA);
+  const [criteria, setCriteria] = useState({
+    ...INITIAL_CRITERIA,
+  });
+
   const [outfits, setOutfits] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
 
-  async function generateOutfits(event) {
+  function generateOutfits(event) {
     event.preventDefault();
 
     setLoading(true);
-    setError("");
     setNotice("");
+
+    // Frontend mock generation
+    const generated = createMockOutfits(criteria);
+
+    setOutfits(generated);
+    setNotice(
+      `Successfully generated ${generated.length} demo outfits.`
+    );
+    setLoading(false);
+  }
+
+  function resetFilters() {
+    setCriteria({ ...INITIAL_CRITERIA });
     setOutfits([]);
-
-    try {
-      const response = await api.post(
-        "/admin/predefined-outfits",
-        criteria
-      );
-
-      const data = response.data?.data ?? [];
-      const count = response.data?.count ?? data.length;
-      const validOutfits = Array.isArray(data) ? data : [];
-
-      setOutfits(validOutfits);
-
-      if (count > 0) {
-        setNotice(`Create ${count} predefined outfit mới.`);
-      } else {
-        setNotice(
-          "No have new created outfit."
-        );
-      }
-    } catch (err) {
-      setError(
-        err.response?.data?.message ||
-          err.message ||
-          "Do not create predefined outfits."
-      );
-    } finally {
-      setLoading(false);
-    }
+    setNotice("");
   }
 
   return (
-    <main>
-      <h1>Predefined Outfits</h1>
+    <div className="lf-outfits-page">
+      {/* ADMIN HEADER */}
+      
 
-      <p>
-        Generate public outfit templates based on the selected criteria.
-        The system may skip existing combinations.
-      </p>
+      <main className="lf-outfits-container">
+        {/* PAGE HEADING */}
+        <div className="lf-outfits-intro">
+          <p className="lf-outfits-eyebrow">
+            ADMIN CONSOLE / CATALOG
+          </p>
 
-      {error && <p role="alert">{error}</p>}
-      {notice && <p role="status">{notice}</p>}
+          <h1>Predefined Outfits</h1>
 
-      <form onSubmit={generateOutfits}>
-        {FIELDS.map(({ key, label, options }) => (
-          <div key={key}>
-            <label htmlFor={`criteria-${key}`}>
-              {label}:
-            </label>
+          <p className="lf-outfits-subtitle">
+            Create curated outfit combinations
+            based on your selected criteria.
+          </p>
+        </div>
 
-            <select
-              id={`criteria-${key}`}
-              name={key}
-              value={criteria[key]}
-              onChange={(event) =>
-                setCriteria((previous) => ({
-                  ...previous,
-                  [key]: event.target.value,
-                }))
-              }
-              disabled={loading}
-            >
-              {options.map(([value, optionLabel]) => (
-                <option key={value} value={value}>
-                  {optionLabel}
-                </option>
-              ))}
-            </select>
+        {/* GENERATOR */}
+        <section className="lf-generator-panel">
+          <div className="lf-generator-heading">
+            <div>
+              <h2>Outfit Generator</h2>
+              <p>
+                Select your preferences to generate
+                predefined looks.
+              </p>
+            </div>
+
+            {DEMO_MODE && (
+  <span className="lf-demo-badge">
+    DEMO MODE
+  </span>
+)}
           </div>
-        ))}
 
-        <button type="submit" disabled={loading}>
-          {loading ? "Creating outfits..." : "Generate Outfits"}
-        </button>
-      </form>
+          <form onSubmit={generateOutfits}>
+            <div className="lf-criteria-grid">
+              {FIELDS.map(
+                ({ key, label, options }) => (
+                  <div
+                    className="lf-criteria-field"
+                    key={key}
+                  >
+                    <label
+                      htmlFor={`criteria-${key}`}
+                    >
+                      {label}
+                    </label>
 
-      {outfits.length > 0 && (
-        <section>
-          <h2>Newly created outfits ({outfits.length})</h2>
-
-          {outfits.map((outfit, index) => (
-            <article key={getId(outfit) ?? index}>
-              <h3>Body shape: {outfit.bodyShape}</h3>
-
-              <p>
-                {outfit.case} · {outfit.style} · {outfit.season}
-              </p>
-
-              <p>
-                Weather: {outfit.weather} · Lifestyle:{" "}
-                {outfit.lifestyle}
-              </p>
-
-              <div>
-                {outfit.items?.map((item, itemIndex) => (
-                  <div key={getId(item) ?? itemIndex}>
-                    {item.imageUrl && (
-                      <img
-                        src={item.imageUrl}
-                        alt={item.name || "Outfit item"}
-                        loading="lazy"
-                        decoding="async"
-                        style={{
-                          width: 100,
-                          height: 100,
-                          objectFit: "contain",
-                        }}
-                      />
-                    )}
-
-                    <p>{item.name || "Unnamed item"}</p>
-
-                    <p>
-                      {item.category} · {item.color}
-                    </p>
+                    <select
+                      id={`criteria-${key}`}
+                      name={key}
+                      value={criteria[key]}
+                      onChange={(event) =>
+                        setCriteria((previous) => ({
+                          ...previous,
+                          [key]: event.target.value,
+                        }))
+                      }
+                      disabled={loading}
+                    >
+                      {options.map(
+                        ([value, optionLabel]) => (
+                          <option
+                            key={value}
+                            value={value}
+                          >
+                            {optionLabel}
+                          </option>
+                        )
+                      )}
+                    </select>
                   </div>
-                ))}
-              </div>
-            </article>
-          ))}
+                )
+              )}
+            </div>
+
+            <div className="lf-generator-actions">
+              <button
+                type="button"
+                className="lf-reset-btn"
+                onClick={resetFilters}
+              >
+                Reset Filters
+              </button>
+
+              <button
+                type="submit"
+                className="lf-generate-btn"
+                disabled={loading}
+              >
+                ✨{" "}
+                {loading
+                  ? "Generating..."
+                  : "Generate Outfits"}
+              </button>
+            </div>
+          </form>
         </section>
-      )}
-    </main>
+
+        {/* RESULTS */}
+        {notice && (
+          <div
+            className="lf-outfits-notice"
+            role="status"
+          >
+            ✓ {notice}
+          </div>
+        )}
+
+        {outfits.length > 0 && (
+          <section className="lf-generated-section">
+            <div className="lf-generated-heading">
+              <div>
+                <h2>Generated Looks</h2>
+                <p>
+                  Explore your newly created
+                  outfit combinations.
+                </p>
+              </div>
+
+              <span className="lf-results-count">
+                {outfits.length} Outfits
+              </span>
+            </div>
+
+            <div className="lf-generated-grid">
+              {outfits.map((outfit, index) => (
+                <article
+                  className="lf-generated-card"
+                  key={outfit.id}
+                >
+                  <div className="lf-generated-card-top">
+                    <span className="lf-look-number">
+                      LOOK {String(index + 1).padStart(2, "0")}
+                    </span>
+
+                    <span className="lf-shape-badge">
+                      {outfit.bodyShape}
+                    </span>
+                  </div>
+
+                  <div className="lf-look-items">
+                    {outfit.items.map(
+                      (item, itemIndex) => (
+                        <div
+                          className="lf-look-item"
+                          key={itemIndex}
+                        >
+                          <div className="lf-look-item-image">
+                            {item.emoji}
+                          </div>
+
+                          <strong>{item.name}</strong>
+
+                          <span>
+                            {item.category} · {item.color}
+                          </span>
+                        </div>
+                      )
+                    )}
+                  </div>
+
+                  <div className="lf-look-details">
+                    <span>
+                      {getLabel("case", outfit.case)}
+                    </span>
+
+                    <span>
+                      {getLabel("style", outfit.style)}
+                    </span>
+
+                    <span>
+                      {getLabel("season", outfit.season)}
+                    </span>
+
+                    <span>
+                      {getLabel("weather", outfit.weather)}
+                    </span>
+
+                    <span>
+                      {getLabel(
+                        "lifestyle",
+                        outfit.lifestyle
+                      )}
+                    </span>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        )}
+      </main>
+    </div>
   );
 }

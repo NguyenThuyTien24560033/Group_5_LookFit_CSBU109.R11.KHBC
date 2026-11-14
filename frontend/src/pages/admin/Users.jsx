@@ -1,4 +1,11 @@
-import { useEffect, useState } from "react";
+
+import { useEffect, useMemo, useState } from "react";
+import {
+  UsersRound,
+  UserRoundPlus,
+  ShieldCheck,
+  ArrowUp,
+} from "lucide-react";
 import api from "../../services/api.js";
 import "./Users.css";
 
@@ -12,6 +19,29 @@ const INITIAL_PAGINATION = {
   hasNextPage: false,
 };
 
+function formatDate(value) {
+  if (!value) return "—";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) return "—";
+
+  return date.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function getInitials(name) {
+  return (name || "U")
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part.charAt(0).toUpperCase())
+    .join("");
+}
+
 export default function Users() {
   const [users, setUsers] = useState([]);
   const [searchInput, setSearchInput] = useState("");
@@ -21,6 +51,33 @@ export default function Users() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // BACK TO TOP
+  const [showBackToTop, setShowBackToTop] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowBackToTop(window.scrollY > 250);
+    };
+
+    window.addEventListener("scroll", handleScroll, {
+      passive: true,
+    });
+
+    handleScroll();
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
+  // LOAD USERS
   useEffect(() => {
     let cancelled = false;
 
@@ -39,21 +96,29 @@ export default function Users() {
 
         if (cancelled) return;
 
-        const data = response.data;
+        const result = response.data ?? {};
+        const records = Array.isArray(result.data)
+          ? result.data
+          : [];
 
-        setUsers(Array.isArray(data.data) ? data.data : []);
+        setUsers(records);
 
         setPagination({
           ...INITIAL_PAGINATION,
-          ...(data.pagination ?? {}),
-          page: data.pagination?.page ?? page,
+          ...(result.pagination ?? {}),
+          page: result.pagination?.page ?? page,
           pageSize: PAGE_SIZE,
+          totalUsers:
+            result.pagination?.totalUsers ?? records.length,
         });
       } catch (err) {
         if (!cancelled) {
           setUsers([]);
+          setPagination(INITIAL_PAGINATION);
           setError(
-            err.message || "Không thể tải danh sách người dùng."
+            err.response?.data?.message ||
+              err.message ||
+              "Unable to load members."
           );
         }
       } finally {
@@ -82,146 +147,279 @@ export default function Users() {
     setPage(1);
   }
 
-  function formatDate(value) {
-    if (!value) return "Chưa có thông tin";
+  const visibleStats = useMemo(() => {
+    const now = new Date();
+    const weekAgo = new Date(now);
+    weekAgo.setDate(now.getDate() - 7);
 
-    const date = new Date(value);
+    return {
+      admins: users.filter(
+        (user) => user.role?.toUpperCase() === "ADMIN"
+      ).length,
 
-    if (Number.isNaN(date.getTime())) {
-      return "Chưa có thông tin";
-    }
+      newThisWeek: users.filter((user) => {
+        if (!user.createdAt) return false;
 
-    return date.toLocaleDateString("vi-VN");
-  }
+        const date = new Date(user.createdAt);
 
-return (
-  <main className="admin-users-page">
-    <header className="admin-users-header">
-      <div>
-        <h1>User Management</h1>
-        <p>Manage and search LFit user accounts.</p>
-      </div>
+        return (
+          !Number.isNaN(date.getTime()) &&
+          date >= weekAgo &&
+          date <= now
+        );
+      }).length,
+    };
+  }, [users]);
 
-      <div className="admin-users-total">
-        <span>Total Matching Users</span>
-        <strong>{pagination.totalUsers}</strong>
-      </div>
-    </header>
+  const stats = [
+    {
+      label: "Members",
+      value: pagination.totalUsers,
+      description: "Registered LookFit accounts",
+      icon: UsersRound,
+    },
+    {
+      label: "New this week",
+      value: visibleStats.newThisWeek,
+      description: "Joined in the last 7 days",
+      icon: UserRoundPlus,
+    },
+    {
+      label: "Admins",
+      value: visibleStats.admins,
+      description: "Accounts with admin access",
+      icon: ShieldCheck,
+    },
+  ];
 
-    <form className="admin-users-search" onSubmit={handleSearch}>
-      <div className="admin-users-search-field">
-        <label htmlFor="user-search">Name or Email</label>
-        <input
-          id="user-search"
-          type="text"
-          value={searchInput}
-          onChange={(event) => setSearchInput(event.target.value)}
-          placeholder="Enter name or email..."
-        />
-      </div>
-
-      <button
-        type="submit"
-        className="admin-users-button admin-users-button--primary"
-        disabled={loading}
-      >
-        Search
-      </button>
-
-      <button
-        type="button"
-        className="admin-users-button"
-        onClick={handleClearSearch}
-        disabled={loading && !search && !searchInput}
-      >
-        Clear Search
-      </button>
-    </form>
-
-    {error && (
-      <p className="admin-users-error" role="alert">
-        {error}
-      </p>
-    )}
-
-    {loading ? (
-      <div className="admin-users-state">
-        Loading users...
-      </div>
-    ) : users.length === 0 ? (
-      <div className="admin-users-state">
-        No matching users found.
-      </div>
-    ) : (
-      <>
-        <div className="admin-users-list">
-          {users.map((user, index) => (
-            <article
-              className="admin-user-card"
-              key={user._id ?? user.id ?? user.email ?? index}
-            >
-              <div className="admin-user-card-header">
-                <div className="admin-user-avatar" aria-hidden="true">
-                  {(user.name || user.email || "?")
-                    .trim()
-                    .charAt(0)
-                    .toUpperCase()}
-                </div>
-
-                <div className="admin-user-heading">
-                  <h2>{user.name || "No Name"}</h2>
-                  <p>{user.email || "No Email"}</p>
-                </div>
-
-                <span
-                  className={`admin-user-role ${
-                    user.role === "ADMIN"
-                      ? "admin-user-role--admin"
-                      : ""
-                  }`}
-                >
-                  {user.role || "USER"}
-                </span>
-              </div>
-
-              <div className="admin-user-details">
-                <p>
-                  <span>Registration Date</span>
-                  <strong>{formatDate(user.createdAt)}</strong>
-                </p>
-              </div>
-            </article>
-          ))}
+  return (
+    <div className="lf-members-page">
+      <main className="lf-members-container">
+        {/* INTRO */}
+        <div className="lf-members-intro">
+          <p className="lf-members-kicker">COMMUNITY</p>
+          <h1>Members.</h1>
+          <p>The people styling their looks with LookFit.</p>
         </div>
 
-        <nav
-          className="admin-users-pagination"
-          aria-label="User pagination"
+        {/* STATISTICS */}
+        <section className="lf-members-stats">
+          {stats.map((stat) => {
+            const Icon = stat.icon;
+
+            return (
+              <article
+                className="lf-members-stat-card"
+                key={stat.label}
+              >
+                <div className="lf-members-stat-top">
+                  <h2>{stat.label}</h2>
+
+                  <span className="lf-members-stat-icon">
+                    <Icon size={20} strokeWidth={1.8} />
+                  </span>
+                </div>
+
+                <strong>{stat.value}</strong>
+                <p>{stat.description}</p>
+              </article>
+            );
+          })}
+        </section>
+
+        {/* MEMBERS TABLE */}
+        <section className="lf-members-table-section">
+          <div className="lf-members-table-heading">
+            <h2>All members</h2>
+            <span>{pagination.totalUsers} accounts</span>
+          </div>
+
+          {/* SEARCH */}
+          <form
+            className="lf-members-search"
+            onSubmit={handleSearch}
+          >
+            <input
+              type="search"
+              value={searchInput}
+              onChange={(event) =>
+                setSearchInput(event.target.value)
+              }
+              placeholder="Search by name or email..."
+              aria-label="Search members"
+            />
+
+            <button type="submit" disabled={loading}>
+              Search
+            </button>
+
+            <button
+              type="button"
+              className="lf-members-reset"
+              onClick={handleClearSearch}
+            >
+              Reset
+            </button>
+          </form>
+
+          {/* ERROR */}
+          {error && (
+            <p className="lf-members-error" role="alert">
+              {error}
+            </p>
+          )}
+
+          {/* TABLE */}
+          <div className="lf-members-table-scroll">
+            <table className="lf-members-table">
+              <thead>
+                <tr>
+                  <th>USER</th>
+                  <th>ROLE</th>
+                  <th>JOINED DATE</th>
+                  <th>STATUS</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td
+                      colSpan={4}
+                      className="lf-members-empty"
+                    >
+                      Loading members...
+                    </td>
+                  </tr>
+                ) : users.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={4}
+                      className="lf-members-empty"
+                    >
+                      {error
+                        ? "Unable to display members."
+                        : "No matching users found."}
+                    </td>
+                  </tr>
+                ) : (
+                  users.map((user, index) => {
+                    const isAdmin =
+                      user.role?.toUpperCase() === "ADMIN";
+
+                    const isActive =
+                      user.isActive !== false &&
+                      user.status?.toUpperCase() !== "INACTIVE";
+
+                    return (
+                      <tr
+                        key={
+                          user._id ??
+                          user.id ??
+                          user.email ??
+                          index
+                        }
+                      >
+                        <td>
+                          <div className="lf-members-user">
+                            <span className="lf-members-avatar">
+                              {getInitials(
+                                user.name || user.email
+                              )}
+                            </span>
+
+                            <div>
+                              <strong>
+                                {user.name || "Unnamed User"}
+                              </strong>
+                              <p>
+                                {user.email || "No email"}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+
+                        <td>
+                          <span
+                            className={`lf-members-role ${
+                              isAdmin
+                                ? "lf-members-role-admin"
+                                : ""
+                            }`}
+                          >
+                            {isAdmin ? "Admin" : "Member"}
+                          </span>
+                        </td>
+
+                        <td>
+                          {formatDate(user.createdAt)}
+                        </td>
+
+                        <td>
+                          <span
+                            className={`lf-members-status ${
+                              !isActive
+                                ? "lf-members-status-inactive"
+                                : ""
+                            }`}
+                          >
+                            <span className="lf-members-status-dot" />
+                            {isActive ? "Active" : "Inactive"}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* PAGINATION */}
+          {pagination.totalPages > 1 && (
+            <div className="lf-members-pagination">
+              <button
+                type="button"
+                disabled={page <= 1 || loading}
+                onClick={() =>
+                  setPage((current) => current - 1)
+                }
+              >
+                Previous
+              </button>
+
+              <span>
+                Page {page} of {pagination.totalPages}
+              </span>
+
+              <button
+                type="button"
+                disabled={
+                  !pagination.hasNextPage || loading
+                }
+                onClick={() =>
+                  setPage((current) => current + 1)
+                }
+              >
+                Next
+              </button>
+            </div>
+          )}
+        </section>
+      </main>
+
+      {/* BACK TO TOP */}
+      {showBackToTop && (
+        <button
+          type="button"
+          className="lf-members-back-to-top"
+          onClick={scrollToTop}
+          aria-label="Back to top"
+          title="Back to top"
         >
-          <button
-            type="button"
-            className="admin-users-button"
-            disabled={page <= 1 || loading}
-            onClick={() => setPage((current) => current - 1)}
-          >
-            Previous
-          </button>
-
-          <span>
-            Page {page} / {Math.max(1, pagination.totalPages)}
-          </span>
-
-          <button
-            type="button"
-            className="admin-users-button"
-            disabled={!pagination.hasNextPage || loading}
-            onClick={() => setPage((current) => current + 1)}
-          >
-            Next
-          </button>
-        </nav>
-      </>
-    )}
-  </main>
-);
+          <ArrowUp size={24} strokeWidth={1.8} />
+        </button>
+      )}
+    </div>
+  );
 }

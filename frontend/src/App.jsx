@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 
 import Header from "./components/layout/Header.jsx";
 import UserLayout from "./components/layout/Userlayout.jsx";
+import AdminLayout from "./components/layout/Adminlayout.jsx";
 
 import Home from "./pages/user/Home.jsx";
 import Login from "./pages/user/Login.jsx";
@@ -25,6 +26,7 @@ import { useAuth } from "./context/AuthContext.jsx";
 
 import "./App.css";
 
+// LANDING PAGE
 function LandingRoute() {
   const { isAuthenticated, isAdmin, loading } = useAuth();
 
@@ -46,18 +48,22 @@ export default function App() {
   return (
     <main className="app-main">
       <Routes>
+        {/* LANDING */}
         <Route path="/" element={<LandingRoute />} />
 
+        {/* AUTH */}
         <Route element={<UserLayout />}>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
         </Route>
 
+        {/* PUBLIC CATALOG */}
         <Route
           path="/catalog/:id"
           element={<CatalogItemDetail />}
         />
 
+        {/* USER ROUTES */}
         <Route element={<ProtectedRoute />}>
           <Route path="/home" element={<Home />} />
 
@@ -81,20 +87,47 @@ export default function App() {
           </Route>
         </Route>
 
+        {/* ADMIN PREVIEW - DEVELOPMENT ONLY */}
+        {import.meta.env.DEV && (
+          <Route
+            path="/admin-preview"
+            element={<AdminLayout />}
+          >
+            <Route index element={<Dashboard />} />
+
+            <Route
+              path="predefined-outfits"
+              element={<PredefinedOutfits />}
+            />
+
+            <Route
+              path="users"
+              element={<Users />}
+            />
+          </Route>
+        )}
+
+        {/* ADMIN ROUTES - LOGIN REQUIRED */}
         <Route element={<AdminRoute />}>
-          <Route path="/admin" element={<Dashboard />} />
-
           <Route
-            path="/admin/predefined-outfits"
-            element={<PredefinedOutfits />}
-          />
+            path="/admin"
+            element={<AdminLayout />}
+          >
+            <Route index element={<Dashboard />} />
 
-          <Route
-            path="/admin/users"
-            element={<Users />}
-          />
+            <Route
+              path="predefined-outfits"
+              element={<PredefinedOutfits />}
+            />
+
+            <Route
+              path="users"
+              element={<Users />}
+            />
+          </Route>
         </Route>
 
+        {/* NOT FOUND */}
         <Route
           path="*"
           element={<Navigate to="/" replace />}
