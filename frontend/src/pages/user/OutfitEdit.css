@@ -1,422 +1,364 @@
+/* --- Trang tổng thể --- */
 .outfit-edit-page {
-  width: min(1100px, 100%);
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 32px 20px;
-  color: #111827;
+  padding: 32px 24px 64px;
+  font-family: inherit;
+  color: #1f2937;
+  background-color: #faf8f5;
+  min-height: 100vh;
 }
 
+/* --- Header --- */
 .outfit-edit-header {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 24px;
+  align-items: flex-start;
+  margin-bottom: 32px;
+  border-bottom: 1px solid #e7e5e4;
+  padding-bottom: 20px;
 }
 
 .outfit-edit-header h1 {
-  margin: 0;
   font-size: 28px;
+  font-weight: 700;
+  color: #1c1917;
+  margin-bottom: 6px;
 }
 
-.outfit-edit-header p,
-.outfit-edit-section-header p {
-  margin: 8px 0 0;
-  color: #6b7280;
-  line-height: 1.6;
+.outfit-edit-header p {
+  font-size: 14px;
+  color: #78716c;
 }
 
 .outfit-edit-status {
-  padding: 5px 12px;
-  border: 1px solid #fcd34d;
-  border-radius: 20px;
-  background: #fef3c7;
+  background-color: #fff1f2;
+  color: #e11d48;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+  border: 1px solid #fecdd3;
 }
 
-/* Buttons */
-.outfit-edit-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 10px 14px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
+/* --- Loading & Empty States --- */
+.outfit-edit-loading {
+  text-align: center;
+  padding: 60px 0;
+  font-size: 16px;
+  color: #78716c;
+}
+
+.outfit-edit-empty {
   background: #ffffff;
-  color: #111827;
+  border: 1px dashed #d7d3cb;
+  border-radius: 16px;
+  padding: 48px 24px;
+  text-align: center;
+  margin: 24px 0;
+}
+
+.outfit-edit-empty h1 {
+  font-size: 22px;
+  font-weight: 600;
+  color: #1c1917;
+  margin-bottom: 12px;
+}
+
+.outfit-edit-empty-text {
+  color: #78716c;
   font-size: 14px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
+  font-style: italic;
+  padding: 24px 0;
+  text-align: center;
 }
 
-.outfit-edit-button:hover:not(:disabled) {
-  background: #f3f4f6;
-}
-
-.outfit-edit-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
-.outfit-edit-button--primary {
-  border-color: #111827;
-  background: #111827;
-  color: #ffffff;
-  font-weight: 600;
-}
-
-.outfit-edit-button--primary:hover:not(:disabled) {
-  background: #374151;
-}
-
-.outfit-edit-button--remove {
-  margin-top: 10px;
-  border-color: #fecaca;
-  color: #b91c1c;
-}
-
-.outfit-edit-button--remove:hover:not(:disabled) {
-  background: #fef2f2;
-}
-
-.outfit-edit-button--select {
-  width: 100%;
-  margin-top: 12px;
-  font-weight: 600;
-}
-
-/* Messages */
+/* --- Thông báo (Messages) --- */
 .outfit-edit-message {
-  margin: 0 0 20px;
-  padding: 12px 14px;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  overflow-wrap: anywhere;
-  line-height: 1.6;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 14px;
+  margin-bottom: 24px;
+  background-color: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
 }
 
 .outfit-edit-message--error {
-  border-color: #fecaca;
-  background: #fef2f2;
-  color: #b91c1c;
+  background-color: #fff1f2;
+  color: #9f1239;
+  border-color: #fecdd3;
 }
 
-/* Sections */
+/* --- Các Sections --- */
 .outfit-edit-section {
-  margin-top: 24px;
-  padding: 22px;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
   background: #ffffff;
-  box-shadow: 0 2px 6px rgb(0 0 0 / 3%);
+  border: 1px solid #e7e5e4;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 28px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
 }
 
 .outfit-edit-section-header {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  align-items: center;
   margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f5f5f4;
 }
 
 .outfit-edit-section-header h2 {
-  margin: 0;
-  font-size: 20px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1c1917;
+  margin-bottom: 4px;
+}
+
+.outfit-edit-section-header p {
+  font-size: 13px;
+  color: #78716c;
 }
 
 .outfit-edit-count {
-  padding: 5px 10px;
-  border: 1px solid #e5e7eb;
-  border-radius: 20px;
-  color: #4b5563;
   font-size: 13px;
+  font-weight: 500;
+  background: #f5f5f4;
+  color: #44403c;
+  padding: 4px 10px;
+  border-radius: 12px;
 }
 
-/* Current outfit items */
+/* --- Current Items List --- */
 .outfit-edit-current-list {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 16px;
 }
 
 .outfit-edit-current-item {
   display: flex;
-  align-items: flex-start;
   gap: 14px;
-  min-width: 0;
-  padding: 14px;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
+  background: #fafaf9;
+  border: 1px solid #e7e5e4;
+  border-radius: 12px;
+  padding: 12px;
+  align-items: center;
 }
 
 .outfit-edit-image,
 .outfit-edit-image-placeholder {
-  width: 100px;
-  height: 120px;
-  flex-shrink: 0;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
+  width: 70px;
+  height: 85px;
   object-fit: cover;
-  background: #f9fafb;
+  border-radius: 8px;
+  flex-shrink: 0;
+  background: #e7e5e4;
 }
 
 .outfit-edit-image-placeholder {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 6px;
-  color: #6b7280;
-  font-size: 12px;
+  font-size: 11px;
+  color: #78716c;
   text-align: center;
 }
 
 .outfit-edit-item-info {
+  flex: 1;
   min-width: 0;
-  overflow-wrap: anywhere;
 }
 
 .outfit-edit-item-info h3 {
-  margin: 0 0 8px;
-  font-size: 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1c1917;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 4px;
 }
 
 .outfit-edit-item-info p {
-  margin: 5px 0;
-  color: #4b5563;
-  font-size: 14px;
+  font-size: 12px;
+  color: #78716c;
+  margin-bottom: 2px;
 }
 
-/* Catalog category filter */
+/* --- Filter & Category --- */
 .outfit-edit-filter {
-  display: grid;
-  grid-template-columns: minmax(0, 300px);
-  gap: 8px;
-  margin-bottom: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 20px;
+  max-width: 240px;
 }
 
 .outfit-edit-filter label {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 500;
+  color: #44403c;
 }
 
 .outfit-edit-filter select {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  background: #ffffff;
-  color: #111827;
+  padding: 9px 12px;
+  border: 1px solid #d7d3cb;
+  border-radius: 8px;
+  background-color: #fff;
   font-size: 14px;
+  color: #1c1917;
+  outline: none;
+  transition: border-color 0.2s;
 }
 
 .outfit-edit-filter select:focus {
-  outline: 2px solid #9ca3af;
-  outline-offset: 2px;
+  border-color: #e11d48;
 }
 
-/* Catalog products */
+/* --- Product Grid (Replacement Catalog) --- */
 .outfit-edit-product-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
   gap: 18px;
+  margin-bottom: 24px;
 }
 
 .outfit-edit-product-card {
+  background: #ffffff;
+  border: 1px solid #e7e5e4;
+  border-radius: 12px;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  min-width: 0;
-  overflow: hidden;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  background: #ffffff;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.outfit-edit-product-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .outfit-edit-product-image,
 .outfit-edit-product-placeholder {
   width: 100%;
-  height: 210px;
+  height: 180px;
   object-fit: cover;
-  background: #f9fafb;
+  background: #f5f5f4;
 }
 
 .outfit-edit-product-placeholder {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 12px;
-  color: #6b7280;
-  font-size: 13px;
-  text-align: center;
+  font-size: 12px;
+  color: #78716c;
 }
 
 .outfit-edit-product-info {
+  padding: 12px;
   display: flex;
-  flex: 1;
   flex-direction: column;
-  align-items: stretch;
-  padding: 14px;
+  flex: 1;
 }
 
 .outfit-edit-product-info h3 {
-  margin: 0 0 10px;
-  overflow-wrap: anywhere;
-  font-size: 16px;
-  line-height: 1.4;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1c1917;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .outfit-edit-product-info p {
-  margin: 4px 0;
-  color: #4b5563;
-  font-size: 14px;
+  font-size: 12px;
+  color: #78716c;
+  margin-bottom: 2px;
 }
 
-.outfit-edit-product-info .outfit-edit-button {
-  margin-top: auto;
-  padding-top: 10px;
+/* --- Buttons --- */
+.outfit-edit-button {
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 8px;
+  border: 1px solid #d7d3cb;
+  background-color: #ffffff;
+  color: #44403c;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-/* Pagination */
+.outfit-edit-button:hover:not(:disabled) {
+  background-color: #f5f5f4;
+  border-color: #a8a29e;
+}
+
+.outfit-edit-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.outfit-edit-button--remove {
+  margin-top: 8px;
+  padding: 4px 10px;
+  font-size: 11px;
+  color: #e11d48;
+  border-color: #fecdd3;
+  background-color: #fff1f2;
+}
+
+.outfit-edit-button--remove:hover:not(:disabled) {
+  background-color: #ffe4e6;
+  border-color: #fda4af;
+}
+
+.outfit-edit-button--select {
+  margin-top: 12px;
+  width: 100%;
+  background-color: #fafaf9;
+  border-color: #e7e5e4;
+}
+
+.outfit-edit-button--select:hover:not(:disabled) {
+  background-color: #f5f5f4;
+  border-color: #d7d3cb;
+}
+
+/* --- Pagination --- */
 .outfit-edit-pagination {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   gap: 16px;
   margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #f5f5f4;
+  font-size: 13px;
+  color: #78716c;
 }
 
-.outfit-edit-pagination span {
-  color: #4b5563;
-  font-size: 14px;
-}
-
-/* Empty and loading states */
-.outfit-edit-empty,
-.outfit-edit-empty-text {
-  padding: 24px;
-  border: 1px dashed #d1d5db;
-  border-radius: 8px;
-  color: #6b7280;
-  text-align: center;
-}
-
-.outfit-edit-loading {
-  padding: 20px 0;
-  color: #6b7280;
-}
-
-/* Footer actions */
+/* --- Footer Actions --- */
 .outfit-edit-footer {
   display: flex;
-  flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 12px;
-  margin-top: 24px;
-  padding-bottom: 24px;
+  margin-top: 32px;
 }
 
-/* Responsive */
-@media (max-width: 850px) {
-  .outfit-edit-product-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .outfit-edit-current-list {
-    grid-template-columns: 1fr;
-  }
+.outfit-edit-button--primary {
+  background-color: #e11d48;
+  color: #ffffff;
+  border-color: #e11d48;
+  padding: 10px 24px;
+  font-weight: 600;
 }
 
-@media (max-width: 550px) {
-  .outfit-edit-page {
-    padding: 20px 12px;
-  }
-
-  .outfit-edit-header h1 {
-    font-size: 24px;
-  }
-
-  .outfit-edit-section {
-    padding: 16px;
-  }
-
-  .outfit-edit-product-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .outfit-edit-product-image,
-  .outfit-edit-product-placeholder {
-    height: 240px;
-  }
-
-  .outfit-edit-current-item {
-    gap: 10px;
-    padding: 10px;
-  }
-
-  .outfit-edit-image,
-  .outfit-edit-image-placeholder {
-    width: 80px;
-    height: 100px;
-  }
-
-  .outfit-edit-footer {
-    flex-direction: column;
-  }
-
-  .outfit-edit-footer button {
-    width: 100%;
-  }
-}
-
-
-/* Align Recommendation with Profile */
-
-.recommendation-page {
-  padding: 55px 40px 90px;
-  box-sizing: border-box;
-}
-
-.recommendation-container {
-  width: min(1400px, 100%);
-  margin: 0 auto;
-}
-
-/* Back button same as Profile */
-.recommendation-back {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 13px 19px;
-  border: 1px solid #e8d9d0;
-  border-radius: 11px;
-  background: #fffdfb;
-  color: #81746d;
-  font-size: 16px;
-  text-decoration: none;
-  box-shadow: 0 2px 5px rgba(60, 40, 30, 0.06);
-  cursor: pointer;
-
-  position: static;
-  transform: none;
-  margin-left: 0;
-}
-
-.recommendation-back:hover {
-  color: #b5527a;
-  border-color: #b5527a;
-}
-
-@media (max-width: 1100px) {
-  .recommendation-page {
-    padding: 40px 28px 70px;
-  }
-}
-
-@media (max-width: 520px) {
-  .recommendation-page {
-    padding: 25px 16px 55px;
-  }
+.outfit-edit-button--primary:hover:not(:disabled) {
+  background-color: #be123c;
+  border-color: #be123c;
 }

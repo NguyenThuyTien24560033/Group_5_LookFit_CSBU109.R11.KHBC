@@ -13,7 +13,6 @@ import CatalogItemDetail from "./pages/user/CatalogItemDetail.jsx";
 import Recommendation from "./pages/user/Recommendation.jsx";
 import RecommendationResult from "./pages/user/RecommendationResult.jsx";
 import OutfitHistory from "./pages/user/OutfitHistory.jsx";
-import OutfitEdit from "./pages/user/OutfitEdit.jsx";
 
 import Dashboard from "./pages/admin/Dashboard.jsx";
 import PredefinedOutfits from "./pages/admin/PredefinedOutfits.jsx";
@@ -47,57 +46,41 @@ export default function App() {
   return (
     <main className="app-main">
       <Routes>
-        {/* PUBLIC LANDING */}
         <Route path="/" element={<LandingRoute />} />
 
-        {/* LOGIN & REGISTER */}
         <Route element={<UserLayout />}>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
         </Route>
 
-        {/* PUBLIC CATALOG */}
         <Route
           path="/catalog/:id"
           element={<CatalogItemDetail />}
         />
 
-        {/* PROTECTED USER PAGES */}
-<Route element={<ProtectedRoute />}>
+        <Route element={<ProtectedRoute />}>
+          <Route path="/home" element={<Home />} />
 
-  {/* Home dashboard */}
-  <Route path="/home" element={<Home />} />
+          <Route element={<Home showDashboard={false} />}>
+            <Route path="/profile" element={<Profile />} />
 
-  {/* Other pages share the Home navigation */}
-  <Route element={<Home showDashboard={false} />}>
+            <Route
+              path="/recommendation"
+              element={<Recommendation />}
+            />
 
-    <Route path="/profile" element={<Profile />} />
+            <Route
+              path="/recommendation/result"
+              element={<RecommendationResult />}
+            />
 
-    <Route
-      path="/recommendation"
-      element={<Recommendation />}
-    />
+            <Route
+              path="/outfits/history"
+              element={<OutfitHistory />}
+            />
+          </Route>
+        </Route>
 
-    <Route
-      path="/recommendation/result"
-      element={<RecommendationResult />}
-    />
-
-    <Route
-      path="/outfits/history"
-      element={<OutfitHistory />}
-    />
-
-    <Route
-      path="/outfits/:id/edit"
-      element={<OutfitEdit />}
-    />
-
-  </Route>
-
-</Route>
-
-        {/* ADMIN PAGES */}
         <Route element={<AdminRoute />}>
           <Route path="/admin" element={<Dashboard />} />
 
@@ -106,11 +89,16 @@ export default function App() {
             element={<PredefinedOutfits />}
           />
 
-          <Route path="/admin/users" element={<Users />} />
+          <Route
+            path="/admin/users"
+            element={<Users />}
+          />
         </Route>
 
-        {/* UNKNOWN ROUTES */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route
+          path="*"
+          element={<Navigate to="/" replace />}
+        />
       </Routes>
     </main>
   );

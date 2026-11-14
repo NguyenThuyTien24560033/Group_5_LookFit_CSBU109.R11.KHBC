@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import "./OutfitEdit.css";
@@ -6,195 +7,274 @@ import "./OutfitEdit.css";
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
-const CATEGORIES = ["top", "bottom", "shoes", "accessory"];
 const STORAGE_KEY = "lookfit_preview_outfits";
+const CATEGORIES = ["top", "bottom", "shoes", "accessory"];
+const PAGE_SIZE = 10;
+
+// =========================
+// HELPERS
+// =========================
+
 function readPreview() {
   try {
-    const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-    return Array.isArray(value) ? value : [];
+    const data = JSON.parse(
+      localStorage.getItem(STORAGE_KEY) || "[]"
+    );
+
+    return Array.isArray(data) ? data : [];
   } catch {
     return [];
   }
 }
 
 function getId(value) {
-  return value?._id ?? value?.id ?? value;
+  if (value == null) return null;
+
+  if (typeof value === "object") {
+    return value._id ?? value.id ?? value.outfitId ?? null;
+  }
+
+  return value;
+}
+
+function normalizeCategory(value) {
+  const category = String(value || "")
+    .trim()
+    .toLowerCase();
+
+  if (category === "accessories") return "accessory";
+
+  return category;
 }
 
 function getCatalogId(item) {
   return getId(item?.catalogId) ?? getId(item);
 }
 
+function getProductKey(item) {
+  const id = getCatalogId(item);
+
+  if (id != null && String(id) !== "") {
+    return String(id);
+  }
+
+  return [
+    String(item?.name || "").trim().toLowerCase(),
+    normalizeCategory(item?.category),
+    String(item?.color || "").trim().toLowerCase(),
+  ].join("|");
+}
+
 function getItemKey(item, index) {
-  return String(
-    item?._id ??
-    item?.id ??
-    item?.catalogId ??
-    index
-  );
+  return `${getProductKey(item)}-${index}`;
 }
 
 function getImageUrl(item) {
   if (!item) return "";
-  if (item.imageUrl && typeof item.imageUrl === "string" && item.imageUrl.trim()) {
+
+  if (
+    typeof item.imageUrl === "string" &&
+    item.imageUrl.trim()
+  ) {
     return item.imageUrl.trim();
   }
-  const id =
-    typeof item === "string"
-      ? item
-      : item.imageId?._id ?? item.imageId?.id ?? item.imageId;
-  return id ? `${API_BASE_URL}/images/${id}` : "";
+
+  const imageId = getId(item.imageId);
+
+  return imageId
+    ? `${API_BASE_URL}/images/${imageId}`
+    : "";
 }
 
-function OutfitEdit() {
+function isDraft(outfit) {
+  return (
+    String(outfit?.status || "DRAFT").toUpperCase() ===
+    "DRAFT"
+  );
+}
+
+// =========================
+// COMPONENT
+// =========================
+
+export default function OutfitEdit() {
   const { id } = useParams();
   const navigate = useNavigate();
 
   const [outfit, setOutfit] = useState(null);
   const [category, setCategory] = useState("top");
-  const [products, setProducts] = useState([]);
-
-  const [pagination, setPagination] = useState({
-    page: 1,
-    pageSize: 10,
-    totalProducts: 0,
-    totalPages: 0,
-    hasNextPage: false,
-  });
+  const [page, setPage] = useState(1);
 
   const [loading, setLoading] = useState(true);
-  const [productsLoading, setProductsLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
 
-  const [outfitLoaded, setOutfitLoaded] = useState(false);
+  // =========================
+  // LOAD DRAFT
+  // =========================
 
-  const showError = (error, fallback) => {
-    setIsError(true);
-    setMessage(error?.message || fallback);
-  };
-
-  // Frontend preview: use the same storage as OutfitHistory.jsx.
   useEffect(() => {
     setLoading(true);
     setMessage("");
     setIsError(false);
+
     const saved = readPreview();
-    const found = saved.find((entry) => String(getId(entry)) === String(id));
-    if (!found || String(found.status || "DRAFT").toUpperCase() !== "DRAFT") {
+
+    const found = saved.find(
+      (entry) =>
+        String(getId(entry)) === String(id)
+    );
+
+    if (!found || !isDraft(found)) {
       setOutfit(null);
-      setOutfitLoaded(false);
-      setMessage("Draft outfit not found or already finalized.");
       setIsError(true);
-    } else {
-      setOutfit({ ...found, items: found.items ?? [] });
-      setOutfitLoaded(true);
-      const firstCategory = CATEGORIES.find((cat) =>
-        found.items?.some((item) => item.category === cat)
+      setMessage(
+        "Draft outfit not found or already finalized."
       );
-      if (firstCategory) setCategory(firstCategory);
+    } else {
+      setOutfit({
+        ...found,
+        items: Array.isArray(found.items)
+          ? [...found.items]
+          : [],
+      });
+
+      const firstCategory = CATEGORIES.find((cat) =>
+        found.items?.some(
+          (item) =>
+            normalizeCategory(item.category) === cat
+        )
+      );
+
+      setCategory(firstCategory || "top");
+      setPage(1);
     }
+
     setLoading(false);
   }, [id]);
 
-  // Catalog preview is built from items already stored in History.
-  // This avoids backend/CORS requests in frontend-only mode.
-  useEffect(() => {
+  // =========================
+  // BUILD PREVIEW CATALOG
+  // =========================
+
+  const catalog = useMemo(() => {
     const unique = new Map();
-    readPreview().flatMap((entry) => entry.items ?? []).forEach((item) => {
-      const productId = getCatalogId(item);
-      if (productId && item.category === category) {
-        unique.set(String(productId), item);
-      }
+
+    readPreview().forEach((entry) => {
+      (entry.items ?? []).forEach((item) => {
+        if (!item || typeof item !== "object") return;
+
+        const productCategory = normalizeCategory(
+          item.category
+        );
+
+        if (!productCategory) return;
+
+        const key = `${productCategory}:${getProductKey(item)}`;
+
+        if (!unique.has(key)) {
+          unique.set(key, item);
+        }
+      });
     });
-    const all = [...unique.values()];
-    const pageSize = 10;
-    const totalPages = Math.ceil(all.length / pageSize);
-    const page = Math.min(pagination.page, Math.max(totalPages, 1));
-    setProducts(all.slice((page - 1) * pageSize, page * pageSize));
-    setPagination((current) => ({
-      ...current, page, pageSize, totalProducts: all.length,
-      totalPages, hasNextPage: page < totalPages,
-    }));
-    setProductsLoading(false);
-  }, [category, pagination.page]);
+
+    return [...unique.values()];
+  }, [id]);
+
+  const products = useMemo(() => {
+    return catalog.filter(
+      (item) =>
+        normalizeCategory(item.category) === category
+    );
+  }, [catalog, category]);
+
+  const totalPages = Math.ceil(
+    products.length / PAGE_SIZE
+  );
+
+  const visibleProducts = products.slice(
+    (page - 1) * PAGE_SIZE,
+    page * PAGE_SIZE
+  );
+
+  // =========================
+  // CATEGORY
+  // =========================
 
   const handleCategoryChange = (event) => {
-    const nextCategory = event.target.value;
-
-    setCategory(nextCategory);
-    setPagination((current) => ({
-      ...current,
-      page: 1,
-    }));
+    setCategory(event.target.value);
+    setPage(1);
   };
+
+  // =========================
+  // SELECT PRODUCT
+  // =========================
 
   const handleSelectProduct = (product) => {
     if (!outfit || saving) return;
 
-    const productId = getId(product);
-
-    if (!productId) {
-      setIsError(true);
-      setMessage("The selected product has no valid ID.");
-      return;
-    }
-
-    const selectedItem = {
-      ...product,
-      catalogId: String(productId),
-    };
+    const selectedItem = { ...product };
 
     const currentItems = outfit.items ?? [];
+
     const existingIndex = currentItems.findIndex(
-      (item) => item.category === product.category
+      (item) =>
+        normalizeCategory(item.category) ===
+        normalizeCategory(product.category)
     );
 
-    let updatedItems;
-
-    if (existingIndex >= 0) {
-      updatedItems = currentItems.map((item, index) =>
-        index === existingIndex
-          ? selectedItem
-          : item
-      );
-    } else {
-      updatedItems = [...currentItems, selectedItem];
-    }
+    const updatedItems =
+      existingIndex >= 0
+        ? currentItems.map((item, index) =>
+            index === existingIndex
+              ? selectedItem
+              : item
+          )
+        : [...currentItems, selectedItem];
 
     setOutfit((current) => ({
       ...current,
       items: updatedItems,
     }));
 
-    setMessage(`${product.name} selected.`);
+    setMessage(
+      `${product.name || "Product"} selected.`
+    );
     setIsError(false);
   };
 
-  const handleRemoveItem = (itemToRemove) => {
-    if (!outfit || saving) return;
+  // =========================
+  // REMOVE ITEM
+  // =========================
 
-    const removeId = getCatalogId(itemToRemove);
+  const handleRemoveItem = (indexToRemove) => {
+    if (!outfit || saving) return;
 
     setOutfit((current) => ({
       ...current,
-      items: (current.items ?? []).filter((item) => {
-        return String(getCatalogId(item)) !== String(removeId);
-      }),
+      items: (current.items ?? []).filter(
+        (_, index) => index !== indexToRemove
+      ),
     }));
 
     setMessage("Item removed from the draft.");
     setIsError(false);
   };
 
-  const handleSave = async () => {
+  // =========================
+  // SAVE CHANGES
+  // =========================
+
+  const handleSave = () => {
     if (!outfit || saving) return;
 
-    const items = outfit.items ?? [];
-    if (!items.length) {
+    if (!outfit.items?.length) {
       setIsError(true);
-      setMessage("Your outfit must contain at least one item.");
+      setMessage(
+        "Your outfit must contain at least one item."
+      );
       return;
     }
 
@@ -204,47 +284,59 @@ function OutfitEdit() {
 
     try {
       const saved = readPreview();
-      const index = saved.findIndex((entry) => String(getId(entry)) === String(id));
-      if (index === -1 || String(saved[index].status || "DRAFT").toUpperCase() !== "DRAFT") {
-        throw new Error("Draft no longer exists or has been finalized.");
+
+      const index = saved.findIndex(
+        (entry) =>
+          String(getId(entry)) === String(id)
+      );
+
+      if (
+        index === -1 ||
+        !isDraft(saved[index])
+      ) {
+        throw new Error(
+          "Draft no longer exists or has been finalized."
+        );
       }
+
       saved[index] = {
         ...saved[index],
         items: outfit.items,
         updatedAt: new Date().toISOString(),
       };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(saved)
+      );
+
       navigate("/outfits/history", {
         replace: true,
-        state: { message: "Draft updated successfully." },
+        state: {
+          message: "Draft updated successfully.",
+        },
       });
     } catch (error) {
-      showError(error, "Unable to save outfit changes.");
+      setIsError(true);
+      setMessage(
+        error?.message ||
+          "Unable to save outfit changes."
+      );
     } finally {
       setSaving(false);
     }
   };
 
-  const handlePageChange = (nextPage) => {
-    if (
-      productsLoading ||
-      saving ||
-      nextPage < 1 ||
-      nextPage === pagination.page
-    ) {
-      return;
-    }
-
-    setPagination((current) => ({
-      ...current,
-      page: nextPage,
-    }));
-  };
+  // =========================
+  // LOADING / NOT FOUND
+  // =========================
 
   if (loading) {
     return (
       <main className="outfit-edit-page">
-        <p className="outfit-edit-loading">Loading outfit...</p>
+        <p className="outfit-edit-loading">
+          Loading outfit...
+        </p>
       </main>
     );
   }
@@ -256,13 +348,15 @@ function OutfitEdit() {
           <h1>Edit Draft Outfit</h1>
 
           <p className="outfit-edit-message outfit-edit-message--error">
-            {message || "Outfit not found."}
+            {message}
           </p>
 
           <button
             type="button"
             className="outfit-edit-button"
-            onClick={() => navigate("/outfits/history")}
+            onClick={() =>
+              navigate("/outfits/history")
+            }
           >
             Back to History
           </button>
@@ -271,35 +365,49 @@ function OutfitEdit() {
     );
   }
 
+  // =========================
+  // MAIN UI
+  // =========================
+
   return (
     <main className="outfit-edit-page">
+
       <header className="outfit-edit-header">
         <div>
           <h1>Edit Draft Outfit</h1>
+
           <p>
-            Replace or remove items, then save your changes.
+            Replace or remove items, then save
+            your changes.
           </p>
         </div>
 
-        <span className="outfit-edit-status">DRAFT</span>
+        <span className="outfit-edit-status">
+          DRAFT
+        </span>
       </header>
 
       {message && (
         <p
           role={isError ? "alert" : "status"}
           className={`outfit-edit-message ${
-            isError ? "outfit-edit-message--error" : ""
+            isError
+              ? "outfit-edit-message--error"
+              : ""
           }`}
         >
           {message}
         </p>
       )}
 
+      {/* CURRENT ITEMS */}
       <section className="outfit-edit-section">
         <div className="outfit-edit-section-header">
           <div>
             <h2>Current outfit items</h2>
-            <p>Items currently included in this draft.</p>
+            <p>
+              Items currently included in this draft.
+            </p>
           </div>
 
           <span className="outfit-edit-count">
@@ -322,10 +430,6 @@ function OutfitEdit() {
                       className="outfit-edit-image"
                       src={imageUrl}
                       alt={item.name || "Outfit item"}
-                      loading="lazy"
-                      onError={(event) => {
-                        event.currentTarget.style.display = "none";
-                      }}
                     />
                   ) : (
                     <div className="outfit-edit-image-placeholder">
@@ -334,14 +438,24 @@ function OutfitEdit() {
                   )}
 
                   <div className="outfit-edit-item-info">
-                    <h3>{item.name || "Unnamed item"}</h3>
-                    <p>Category: {item.category || "N/A"}</p>
-                    <p>Color: {item.color || "N/A"}</p>
+                    <h3>
+                      {item.name || "Unnamed item"}
+                    </h3>
+
+                    <p>
+                      Category: {item.category || "N/A"}
+                    </p>
+
+                    <p>
+                      Color: {item.color || "N/A"}
+                    </p>
 
                     <button
                       type="button"
                       className="outfit-edit-button outfit-edit-button--remove"
-                      onClick={() => handleRemoveItem(item)}
+                      onClick={() =>
+                        handleRemoveItem(index)
+                      }
                       disabled={saving}
                     >
                       Remove
@@ -353,17 +467,21 @@ function OutfitEdit() {
           </div>
         ) : (
           <p className="outfit-edit-empty-text">
-            No items selected. Choose products below before saving.
+            No items selected. Choose products
+            below before saving.
           </p>
         )}
       </section>
 
+      {/* REPLACEMENT PRODUCTS */}
       <section className="outfit-edit-section">
         <div className="outfit-edit-section-header">
           <div>
             <h2>Choose a replacement item</h2>
+
             <p>
-              Select a category to browse available catalog products.
+              Select a category to browse available
+              products.
             </p>
           </div>
         </div>
@@ -379,45 +497,45 @@ function OutfitEdit() {
             onChange={handleCategoryChange}
             disabled={saving}
           >
-            {CATEGORIES.map((itemCategory) => (
-              <option key={itemCategory} value={itemCategory}>
-                {itemCategory}
+            {CATEGORIES.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
               </option>
             ))}
           </select>
         </div>
 
-        {productsLoading ? (
-          <p className="outfit-edit-loading">Loading products...</p>
-        ) : products.length === 0 ? (
+        {visibleProducts.length === 0 ? (
           <div className="outfit-edit-empty">
-            <p>No products found in this category.</p>
+            <p>
+              No products found in this category.
+            </p>
           </div>
         ) : (
           <div className="outfit-edit-product-grid">
-            {products.map((product, index) => {
-              const productId = getId(product);
+            {visibleProducts.map((product, index) => {
               const imageUrl = getImageUrl(product);
 
-              const alreadySelected = (outfit.items ?? []).some(
+              const alreadySelected = (
+                outfit.items ?? []
+              ).some(
                 (item) =>
-                  String(getCatalogId(item)) === String(productId)
+                  normalizeCategory(item.category) ===
+                    normalizeCategory(product.category) &&
+                  getProductKey(item) ===
+                    getProductKey(product)
               );
 
               return (
                 <article
                   className="outfit-edit-product-card"
-                  key={productId ?? index}
+                  key={`${getProductKey(product)}-${index}`}
                 >
                   {imageUrl ? (
                     <img
                       className="outfit-edit-product-image"
                       src={imageUrl}
-                      alt={product.name || "Catalog product"}
-                      loading="lazy"
-                      onError={(event) => {
-                        event.currentTarget.style.display = "none";
-                      }}
+                      alt={product.name || "Product"}
                     />
                   ) : (
                     <div className="outfit-edit-product-placeholder">
@@ -426,15 +544,25 @@ function OutfitEdit() {
                   )}
 
                   <div className="outfit-edit-product-info">
-                    <h3>{product.name || "Unnamed product"}</h3>
-                    <p>Category: {product.category || "N/A"}</p>
-                    <p>Color: {product.color || "N/A"}</p>
+                    <h3>
+                      {product.name || "Unnamed product"}
+                    </h3>
+
+                    <p>
+                      Category: {product.category || "N/A"}
+                    </p>
+
+                    <p>
+                      Color: {product.color || "N/A"}
+                    </p>
 
                     <button
                       type="button"
                       className="outfit-edit-button outfit-edit-button--select"
-                      onClick={() => handleSelectProduct(product)}
-                      disabled={saving || alreadySelected || !productId}
+                      onClick={() =>
+                        handleSelectProduct(product)
+                      }
+                      disabled={saving || alreadySelected}
                     >
                       {alreadySelected
                         ? "Selected"
@@ -447,6 +575,7 @@ function OutfitEdit() {
           </div>
         )}
 
+        {/* PAGINATION */}
         <nav
           className="outfit-edit-pagination"
           aria-label="Catalog product pages"
@@ -454,31 +583,31 @@ function OutfitEdit() {
           <button
             type="button"
             className="outfit-edit-button"
-            onClick={() => handlePageChange(pagination.page - 1)}
-            disabled={
-              productsLoading ||
-              saving ||
-              pagination.page <= 1
+            onClick={() =>
+              setPage((current) =>
+                Math.max(1, current - 1)
+              )
             }
+            disabled={saving || page <= 1}
           >
             Previous
           </button>
 
           <span>
-            Page {pagination.page}
-            {pagination.totalPages > 0
-              ? ` of ${pagination.totalPages}`
-              : ""}
+            Page {page} of {Math.max(totalPages, 1)}
           </span>
 
           <button
             type="button"
             className="outfit-edit-button"
-            onClick={() => handlePageChange(pagination.page + 1)}
+            onClick={() =>
+              setPage((current) =>
+                Math.min(totalPages, current + 1)
+              )
+            }
             disabled={
-              productsLoading ||
               saving ||
-              !pagination.hasNextPage
+              page >= totalPages
             }
           >
             Next
@@ -486,20 +615,25 @@ function OutfitEdit() {
         </nav>
       </section>
 
+      {/* SAVE / CANCEL */}
       <footer className="outfit-edit-footer">
         <button
           type="button"
           className="outfit-edit-button outfit-edit-button--primary"
           onClick={handleSave}
-          disabled={saving || productsLoading || !outfitLoaded}
+          disabled={saving}
         >
-          {saving ? "Saving..." : "Save Changes"}
+          {saving
+            ? "Saving..."
+            : "Save Changes"}
         </button>
 
         <button
           type="button"
           className="outfit-edit-button"
-          onClick={() => navigate("/outfits/history")}
+          onClick={() =>
+            navigate("/outfits/history")
+          }
           disabled={saving}
         >
           Cancel
@@ -508,5 +642,3 @@ function OutfitEdit() {
     </main>
   );
 }
-
-export default OutfitEdit;
