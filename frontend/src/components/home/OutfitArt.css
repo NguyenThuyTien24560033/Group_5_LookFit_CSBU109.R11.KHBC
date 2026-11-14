@@ -1,7 +1,7 @@
 
 .hero-illustration {
   position: relative;
-  width: min(100%, 480px);
+  width: min(100%, 380px);
   aspect-ratio: 1;
   margin: 0 auto;
   display: grid;
@@ -64,8 +64,8 @@
 
 .hero-illustration__circle {
   position: absolute;
-  width: 58%;
-  height: 58%;
+  width: 72%;
+  height: 72%;
   border-radius: 50%;
   background: #f1dfe5;
   z-index: 0;
@@ -82,9 +82,11 @@
 .hero-illustration__dress {
   position: relative;
   z-index: 1;
-  width: 45%;
-  height: 52%;
+  width: 23%;
+  height: auto;
+  max-height: 42%;
   object-fit: contain;
+  mix-blend-mode: normal;
 }
 
 .hero-illustration__mood,
@@ -98,9 +100,9 @@
 }
 
 .hero-illustration__mood {
-  left: 5%;
-  bottom: 13%;
-  padding: 16px 20px;
+  left: 0%;
+  bottom: 8%;
+  padding: 12px 16px;
 }
 
 .hero-illustration__mood span {
@@ -119,9 +121,9 @@
 }
 
 .hero-illustration__match {
-  top: 15%;
-  right: 3%;
-  padding: 15px 18px;
+  top: 5%;
+  right: 0;
+  padding: 12px 16px;
   color: #a25f69;
   font-size: 11px;
 }

@@ -25,7 +25,7 @@ export default function OutfitArt() {
 
       <img
         src="/OutfitArt.png"
-        
+          alt="Editorial outfit"
         className="hero-illustration__dress"
       />
 

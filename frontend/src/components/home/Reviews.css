@@ -241,3 +241,13 @@
     overflow-x: auto;
   }
 }
+
+.hero-illustration__dress {
+      position: relative;
+  z-index: 2;
+  width: 72%;
+  height: auto;
+  object-fit: contain;
+  border-radius: 0;
+  mix-blend-mode: normal;
+}
