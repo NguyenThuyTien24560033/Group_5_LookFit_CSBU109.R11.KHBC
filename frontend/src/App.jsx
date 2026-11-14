@@ -1,7 +1,8 @@
+
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import Header from "./components/layout/Header.jsx";
-import Footer from "./components/layout/Footer.jsx";
+import UserLayout from "./components/layout/Userlayout.jsx";
 
 import Home from "./pages/user/Home.jsx";
 import Login from "./pages/user/Login.jsx";
@@ -21,71 +22,125 @@ import Users from "./pages/admin/Users.jsx";
 import ProtectedRoute from "./routes/ProtectedRoute.jsx";
 import AdminRoute from "./routes/AdminRoute.jsx";
 
+import { useAuth } from "./context/AuthContext.jsx";
+
 import "./App.css";
+
+/* ================= LANDING ROUTE ================= */
+
+function LandingRoute() {
+  const { isAuthenticated, isAdmin, loading } = useAuth();
+
+  if (loading) {
+    return null;
+  }
+
+  if (isAuthenticated) {
+    return (
+      <Navigate
+        to={isAdmin ? "/admin" : "/home"}
+        replace
+      />
+    );
+  }
+
+  return <Header />;
+}
+
+/* ================= APP ================= */
 
 export default function App() {
   return (
-    <>
-    
+    <main className="app-main">
+      <Routes>
 
-      <main className="app-main">
-        <Routes>
-          {/* Public pages */}
-          <Route path="/" element={<Header />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/catalog/:id" element={<CatalogItemDetail />} />
+        {/* PUBLIC LANDING PAGE */}
+        <Route
+          path="/"
+          element={<LandingRoute />}
+        />
 
-          {/* Pages requiring login */}
-          <Route element={<ProtectedRoute />}>
-            <Route path="/profile" element={<Profile />} />
-
-            <Route
-              path="/recommendation"
-              element={<Recommendation />}
-            />
-
-            <Route
-              path="/recommendation/result"
-              element={<RecommendationResult />}
-            />
-
-            {/* Outfit history and Draft/Final management */}
-            <Route
-              path="/outfits/history"
-              element={<OutfitHistory />}
-            />
-
-            <Route
-              path="/outfits/:id/edit"
-              element={<OutfitEdit />}
-            />
-          </Route>
-
-          {/* Admin pages */}
-          <Route element={<AdminRoute />}>
-            <Route path="/admin" element={<Dashboard />} />
-
-            <Route
-              path="/admin/predefined-outfits"
-              element={<PredefinedOutfits />}
-            />
-
-            <Route
-              path="/admin/users"
-              element={<Users />}
-            />
-          </Route>
-
-          {/* Redirect unknown routes */}
+        {/* LOGIN & REGISTER - SHARED LAYOUT */}
+        <Route element={<UserLayout />}>
           <Route
-            path="*"
-            element={<Navigate to="/" replace />}
+            path="/login"
+            element={<Login />}
           />
-        </Routes>
-      </main>
 
-    
-    </>
+          <Route
+            path="/register"
+            element={<Register />}
+          />
+        </Route>
+
+        {/* PUBLIC CATALOG */}
+        <Route
+          path="/catalog/:id"
+          element={<CatalogItemDetail />}
+        />
+
+        {/* USER PAGES */}
+        <Route element={<ProtectedRoute />}>
+
+          <Route
+            path="/home"
+            element={<Home />}
+          />
+
+          <Route
+            path="/profile"
+            element={<Profile />}
+          />
+
+          <Route
+            path="/recommendation"
+            element={<Recommendation />}
+          />
+
+          <Route
+            path="/recommendation/result"
+            element={<RecommendationResult />}
+          />
+
+          <Route
+            path="/outfits/history"
+            element={<OutfitHistory />}
+          />
+
+          <Route
+            path="/outfits/:id/edit"
+            element={<OutfitEdit />}
+          />
+
+        </Route>
+
+        {/* ADMIN PAGES */}
+        <Route element={<AdminRoute />}>
+
+          <Route
+            path="/admin"
+            element={<Dashboard />}
+          />
+
+          <Route
+            path="/admin/predefined-outfits"
+            element={<PredefinedOutfits />}
+          />
+
+          <Route
+            path="/admin/users"
+            element={<Users />}
+          />
+
+        </Route>
+
+        {/* UNKNOWN ROUTES */}
+        <Route
+          path="*"
+          element={<Navigate to="/" replace />}
+        />
+
+      </Routes>
+    </main>
   );
 }

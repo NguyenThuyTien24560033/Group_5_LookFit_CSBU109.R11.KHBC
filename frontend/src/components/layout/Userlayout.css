@@ -1,0 +1,230 @@
+
+/* ================= PAGE ================= */
+
+.user-auth-page {
+  min-height: 100vh;
+  width: 100%;
+  padding: 40px 24px;
+  box-sizing: border-box;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background: #faf8f6;
+  color: #302722;
+}
+
+.user-auth-container {
+  width: min(1180px, 100%);
+  margin: 0 auto;
+}
+
+/* ================= BACK LINK ================= */
+
+.user-auth-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+
+  margin-bottom: 22px;
+
+  color: #8f7e75;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.user-auth-back:hover {
+  color: #b4507e;
+}
+
+/* ================= SHARED CARD ================= */
+
+.user-auth-card {
+  width: 100%;
+  height: 600px;
+
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+
+  overflow: hidden;
+  border: 1px solid #e9ded8;
+  border-radius: 16px;
+
+  background: #fffdfb;
+  box-shadow: 0 22px 55px rgba(80, 55, 50, 0.07);
+}
+
+/* ================= LEFT PANEL ================= */
+
+.user-auth-brand {
+  background: #f3e9e5;
+
+  display: flex;
+  align-items: center;
+
+  padding: 50px 64px;
+  box-sizing: border-box;
+}
+
+.user-auth-brand-content {
+  width: 100%;
+  max-width: 440px;
+}
+
+/* ================= LOGO ================= */
+
+.user-auth-logo {
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 26px;
+  text-decoration: none;
+}
+
+.user-auth-logo img {
+  display: block;
+  width: 175px;
+  height: auto;
+  object-fit: contain;
+}
+
+/* ================= BRAND CONTENT ================= */
+
+.user-auth-intro {
+  width: 100%;
+}
+
+.user-auth-eyebrow {
+  display: block;
+
+  color: #bb4f7b;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.7px;
+}
+
+.user-auth-intro h1 {
+  margin: 24px 0 20px;
+
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(36px, 3.3vw, 48px);
+  font-weight: 400;
+  line-height: 1.12;
+  letter-spacing: -1.5px;
+}
+
+.user-auth-intro h1 em {
+  color: #b5527a;
+  font-weight: 400;
+}
+
+.user-auth-description {
+  max-width: 390px;
+  margin: 0;
+
+  color: #8e7970;
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+/* ================= BENEFITS ================= */
+
+.user-auth-benefits {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+
+  margin-top: 35px;
+}
+
+.user-auth-benefits div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  color: #806e66;
+  font-size: 12px;
+}
+
+.user-auth-benefits svg {
+  color: #73936d;
+}
+
+/* ================= RIGHT PANEL ================= */
+
+.user-auth-form-panel {
+  min-width: 0;
+  padding: 50px 64px;
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  background: #fffdfb;
+}
+
+/* ================= TABLET ================= */
+
+@media (max-width: 900px) {
+  .user-auth-card {
+    height: auto;
+    min-height: 600px;
+  }
+
+  .user-auth-brand,
+  .user-auth-form-panel {
+    padding: 45px 32px;
+  }
+
+  .user-auth-logo img {
+    width: 145px;
+  }
+
+  .user-auth-intro h1 {
+    font-size: 36px;
+  }
+}
+
+/* ================= MOBILE ================= */
+
+@media (max-width: 650px) {
+  .user-auth-page {
+    padding: 22px 16px 50px;
+    align-items: flex-start;
+  }
+
+  .user-auth-card {
+    height: auto;
+    grid-template-columns: 1fr;
+  }
+
+  .user-auth-brand {
+    padding: 35px 26px;
+  }
+
+  .user-auth-logo {
+    margin-bottom: 28px;
+  }
+
+  .user-auth-logo img {
+    width: 140px;
+  }
+
+  .user-auth-intro h1 {
+    font-size: 34px;
+    margin: 16px 0;
+  }
+
+  .user-auth-description {
+    font-size: 14px;
+  }
+
+  .user-auth-benefits {
+    margin-top: 22px;
+  }
+
+  .user-auth-form-panel {
+    padding: 36px 26px 42px;
+  }
+}

@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { ArrowLeft, Mail, LockKeyhole, Check } from "lucide-react";
+import { Mail, LockKeyhole } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import "./Login.css";
 
@@ -26,7 +26,7 @@ export default function Login() {
       if (result.user.role === "ADMIN") {
         navigate("/admin", { replace: true });
       } else {
-        navigate("/", { replace: true });
+        navigate("/home", { replace: true });
       }
     } catch (error) {
       setMessage(error.message || "Unable to connect to server");
@@ -36,123 +36,70 @@ export default function Login() {
   };
 
   return (
-    <main className="lookfit-login-page">
-      <div className="lookfit-login-container">
+    <div className="login-content">
+      <span className="login-eyebrow">
+        WELCOME BACK
+      </span>
 
-        <Link to="/" className="login-back">
-          <ArrowLeft size={15} />
-          Back to LookFit
-        </Link>
+      <h2>Log in to LookFit</h2>
 
-        <section className="lookfit-login-card">
+      <form
+        onSubmit={handleSubmit}
+        className="lookfit-login-form"
+      >
+        <div className="login-field">
+          <label htmlFor="email">
+            <Mail size={15} />
+            Email
+          </label>
 
-          {/* LEFT PANEL */}
-          <div className="login-brand-panel">
-            <Link to="/" className="login-logo">
-              LookFit
-            </Link>
+          <input
+            id="email"
+            type="email"
+            placeholder="you@example.com"
+            autoComplete="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            required
+          />
+        </div>
 
-            <span className="login-eyebrow">
-              YOUR PERSONAL STYLING STUDIO
-            </span>
+        <div className="login-field">
+          <label htmlFor="password">
+            <LockKeyhole size={15} />
+            Password
+          </label>
 
-            <h1>
-              Style that feels like
-              <br />
-              <em>you.</em>
-            </h1>
+          <input
+            id="password"
+            type="password"
+            placeholder="Minimum 8 characters"
+            autoComplete="current-password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            required
+          />
+        </div>
 
-            <p className="login-description">
-              Save your edits, discover new looks, and
-              make every outfit feel intentional.
-            </p>
+        {message && (
+          <p className="login-message" role="alert">
+            {message}
+          </p>
+        )}
 
-            <div className="login-benefits">
-              <div>
-                <Check size={15} />
-                <span>Personalised outfit edits</span>
-              </div>
+        <button
+          type="submit"
+          className="login-submit"
+          disabled={loading}
+        >
+          {loading ? "Logging in..." : "Log in"}
+        </button>
+      </form>
 
-              <div>
-                <Check size={15} />
-                <span>Your looks, saved securely</span>
-              </div>
-            </div>
-          </div>
-
-          {/* RIGHT PANEL */}
-          <div className="login-form-panel">
-            <span className="login-eyebrow">
-              WELCOME BACK
-            </span>
-
-            <h2>Log in to LookFit</h2>
-
-            <form
-              onSubmit={handleSubmit}
-              className="lookfit-login-form"
-            >
-              <div className="login-field">
-                <label htmlFor="email">
-                  <Mail size={15} />
-                  Email
-                </label>
-
-                <input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  autoComplete="email"
-                  value={email}
-                  onChange={(event) =>
-                    setEmail(event.target.value)
-                  }
-                  required
-                />
-              </div>
-
-              <div className="login-field">
-                <label htmlFor="password">
-                  <LockKeyhole size={15} />
-                  Password
-                </label>
-
-                <input
-                  id="password"
-                  type="password"
-                  placeholder="Tối thiểu 8 ký tự"
-                  autoComplete="current-password"
-                  value={password}
-                  onChange={(event) =>
-                    setPassword(event.target.value)
-                  }
-                  required
-                />
-              </div>
-
-              {message && (
-                <p className="login-message" role="alert">
-                  {message}
-                </p>
-              )}
-
-              <button
-                type="submit"
-                className="login-submit"
-                disabled={loading}
-              >
-                {loading ? "Logging in..." : "Log in"}
-              </button>
-            </form>
-
-            <p className="login-register">
-              New to LookFit?{" "}
-              <Link to="/register">Sign up</Link>
-            </p>
-          </div>
-        </section>
-      </div>
-    </main>
+      <p className="login-register">
+        New to LookFit?{" "}
+        <Link to="/register">Sign up</Link>
+      </p>
+    </div>
   );
 }
-

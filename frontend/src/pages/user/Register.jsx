@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, Mail, LockKeyhole, UserRound, Check } from "lucide-react";
+import { UserRound, Mail, LockKeyhole } from "lucide-react";
 import { register } from "../../services/auth.service";
 import "./Register.css";
 
@@ -19,6 +19,11 @@ export default function Register() {
     event.preventDefault();
     setMessage("");
 
+    if (password.length < 8) {
+      setMessage("Password must contain at least 8 characters.");
+      return;
+    }
+
     if (password !== confirmPassword) {
       setMessage("Passwords do not match.");
       return;
@@ -27,7 +32,11 @@ export default function Register() {
     setLoading(true);
 
     try {
-      const result = await register({ name, email, password });
+      const result = await register({
+        name: name.trim(),
+        email: email.trim(),
+        password,
+      });
 
       navigate("/login", {
         replace: true,
@@ -35,163 +44,134 @@ export default function Register() {
           message:
             result.message ||
             "Registration successful. Please log in.",
-          email,
+          email: email.trim(),
         },
       });
     } catch (error) {
-      setMessage(error.message || "Unable to connect to server");
+      setMessage(
+        error.message || "Unable to connect to server"
+      );
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <main className="register-page">
-      <div className="register-container">
-        <Link to="/" className="register-back">
-          <ArrowLeft size={16} />
-          Back to LookFit
-        </Link>
+    <div className="register-content">
+      <span className="register-eyebrow">
+        JOIN THE COMMUNITY
+      </span>
 
-        <section className="register-card">
-          {/* LEFT PANEL */}
-          <div className="register-intro">
-            <Link to="/" className="register-logo">
-              LookFit
-            </Link>
+      <h2>Create your account</h2>
 
-            <div className="register-intro-content">
-              <span className="register-eyebrow">
-                YOUR PERSONAL STYLING STUDIO
-              </span>
+      <form
+        onSubmit={handleSubmit}
+        className="lookfit-register-form"
+      >
+        {/* FULL NAME */}
+        <div className="register-field">
+          <label htmlFor="register-name">
+            <UserRound size={15} />
+            Full name
+          </label>
 
-              <h1>
-                Style that feels like
-                <br />
-                <em>you.</em>
-              </h1>
+          <input
+            id="register-name"
+            type="text"
+            placeholder="Your name"
+            autoComplete="name"
+            value={name}
+            onChange={(event) =>
+              setName(event.target.value)
+            }
+            required
+          />
+        </div>
 
-              <p>
-                Save your edits, discover new looks, and
-                make every outfit feel intentional.
-              </p>
+        {/* EMAIL */}
+        <div className="register-field">
+          <label htmlFor="register-email">
+            <Mail size={15} />
+            Email
+          </label>
 
-              <div className="register-benefits">
-                <span>
-                  <Check size={15} />
-                  Personalised outfit edits
-                </span>
-                <span>
-                  <Check size={15} />
-                  Your looks, saved securely
-                </span>
-              </div>
-            </div>
-          </div>
+          <input
+            id="register-email"
+            type="email"
+            placeholder="you@example.com"
+            autoComplete="email"
+            value={email}
+            onChange={(event) =>
+              setEmail(event.target.value)
+            }
+            required
+          />
+        </div>
 
-          {/* RIGHT PANEL */}
-          <div className="register-form-panel">
-            <span className="register-eyebrow">
-              JOIN THE COMMUNITY
-            </span>
+        {/* PASSWORD */}
+        <div className="register-field">
+          <label htmlFor="register-password">
+            <LockKeyhole size={15} />
+            Password
+          </label>
 
-            <h2>Create your account</h2>
+          <input
+            id="register-password"
+            type="password"
+            placeholder="Minimum 8 characters"
+            autoComplete="new-password"
+            value={password}
+            onChange={(event) =>
+              setPassword(event.target.value)
+            }
+            minLength={8}
+            required
+          />
+        </div>
 
-            <form
-              onSubmit={handleSubmit}
-              className="register-form"
-            >
-              <div className="register-field">
-                <label htmlFor="register-name">
-                  <UserRound size={15} />
-                  Full name
-                </label>
-                <input
-                  id="register-name"
-                  type="text"
-                  placeholder="Your name"
-                  autoComplete="name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  maxLength={100}
-                  required
-                />
-              </div>
+        {/* CONFIRM PASSWORD */}
+        <div className="register-field">
+          <label htmlFor="register-confirm-password">
+            <LockKeyhole size={15} />
+            Confirm password
+          </label>
 
-              <div className="register-field">
-                <label htmlFor="register-email">
-                  <Mail size={15} />
-                  Email
-                </label>
-                <input
-                  id="register-email"
-                  type="email"
-                  placeholder="you@example.com"
-                  autoComplete="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
+          <input
+            id="register-confirm-password"
+            type="password"
+            placeholder="Repeat your password"
+            autoComplete="new-password"
+            value={confirmPassword}
+            onChange={(event) =>
+              setConfirmPassword(event.target.value)
+            }
+            required
+          />
+        </div>
 
-              <div className="register-field">
-                <label htmlFor="register-password">
-                  <LockKeyhole size={15} />
-                  Password
-                </label>
-                <input
-                  id="register-password"
-                  type="password"
-                  placeholder="Tối thiểu 8 ký tự"
-                  autoComplete="new-password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  minLength={8}
-                  required
-                />
-              </div>
+        {/* ERROR MESSAGE */}
+        {message && (
+          <p className="register-message" role="alert">
+            {message}
+          </p>
+        )}
 
-              <div className="register-field">
-                <label htmlFor="register-confirm">
-                  <LockKeyhole size={15} />
-                  Confirm password
-                </label>
-                <input
-                  id="register-confirm"
-                  type="password"
-                  placeholder="Repeat your password"
-                  autoComplete="new-password"
-                  value={confirmPassword}
-                  onChange={(e) =>
-                    setConfirmPassword(e.target.value)
-                  }
-                  minLength={8}
-                  required
-                />
-              </div>
+        {/* SUBMIT */}
+        <button
+          type="submit"
+          className="register-submit"
+          disabled={loading}
+        >
+          {loading
+            ? "Creating account..."
+            : "Create account"}
+        </button>
+      </form>
 
-              {message && (
-                <p className="register-message" role="alert">
-                  {message}
-                </p>
-              )}
-
-              <button
-                type="submit"
-                className="register-submit"
-                disabled={loading}
-              >
-                {loading ? "Creating account..." : "Create account"}
-              </button>
-            </form>
-
-            <p className="register-login-link">
-              Already have an account?{" "}
-              <Link to="/login">Log in</Link>
-            </p>
-          </div>
-        </section>
-      </div>
-    </main>
+      <p className="register-login">
+        Already have an account?{" "}
+        <Link to="/login">Log in</Link>
+      </p>
+    </div>
   );
 }

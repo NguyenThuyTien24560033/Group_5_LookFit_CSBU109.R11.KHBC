@@ -272,21 +272,21 @@ export default function Reviews() {
           ))}
         </div>
         
+{/* CALL TO ACTION */}
+<div className="testimonial-cta">
+  <p>Ready to make getting dressed feel more like you?</p>
 
-        {/* CALL TO ACTION */}
-        <div className="testimonial-cta">
-          <p>
-            Ready to make getting dressed feel more like you?
-          </p>
+  <Link
+  to="/login"
+  className="primary-button"
+  onClick={() => alert("Button clicked!")}
+>
+  Begin your style journey
+  <ArrowRight size={16} />
+</Link>
+</div>
 
-          <Link to="/login" className="primary-button">
-            Begin your style journey
-            <ArrowRight size={16} />
-          </Link>
-        </div>
-
-      </div> {/* Đóng .container */}
-    </section>
-  );
+</div> {/* Đóng .container */}
+</section>
+);
 }
-

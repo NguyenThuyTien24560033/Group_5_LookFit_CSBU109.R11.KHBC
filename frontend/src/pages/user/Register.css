@@ -1,204 +1,110 @@
 
-/* LOOKFIT REGISTER PAGE */
+/* ================= REGISTER FORM ONLY ================= */
 
-.register-page {
-  min-height: 100vh;
-  background: #faf8f6;
-  padding: 42px 24px 80px;
-  box-sizing: border-box;
+.register-content {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
-.register-page * {
-  box-sizing: border-box;
-}
-
-.register-container {
-  width: min(1320px, 100%);
-  margin: 0 auto;
-}
-
-.register-back {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 30px;
-  color: #957b72;
-  text-decoration: none;
-  font-size: 13px;
-}
-
-.register-back:hover {
-  color: #b5527a;
-}
-
-/* MAIN CARD */
-
-.register-card {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  min-height: 650px;
-  overflow: hidden;
-  background: #fffdfb;
-  border: 1px solid #eadbd4;
-  border-radius: 17px;
-  box-shadow: 0 24px 55px rgba(73, 47, 40, 0.08);
-}
-
-/* LEFT PANEL */
-
-.register-intro {
-  background: #f3e9e5;
-  padding: 76px 68px;
-  display: flex;
-  flex-direction: column;
-}
-
-.register-logo {
-  color: #963f68;
-  font-size: 32px;
-  font-weight: 800;
-  letter-spacing: -1.5px;
-  text-decoration: none;
-}
-
-.register-intro-content {
-  margin-top: 64px;
-}
+/* ================= HEADING ================= */
 
 .register-eyebrow {
   display: block;
-  color: #c04c79;
+  color: #bb4f7b;
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: 2px;
+  letter-spacing: 1.7px;
 }
 
-.register-intro h1 {
-  margin: 25px 0 25px;
+.register-content h2 {
+  margin: 20px 0 28px;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(38px, 3.6vw, 55px);
+  font-size: 36px;
   font-weight: 400;
-  line-height: 1.12;
-  letter-spacing: -1.5px;
-  color: #2b2623;
+  letter-spacing: -1px;
+  color: #302722;
 }
 
-.register-intro h1 em {
-  color: #b5527a;
-  font-weight: 400;
-}
+/* ================= FORM ================= */
 
-.register-intro-content > p {
-  max-width: 390px;
-  margin: 0;
-  color: #927b72;
-  font-size: 16px;
-  line-height: 1.9;
-}
-
-.register-benefits {
+.lookfit-register-form {
   display: flex;
   flex-direction: column;
   gap: 17px;
-  margin-top: 48px;
 }
 
-.register-benefits span {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color: #816c63;
-  font-size: 12px;
-}
-
-.register-benefits svg {
-  color: #638b68;
-}
-
-/* RIGHT PANEL */
-
-.register-form-panel {
-  padding: 76px 68px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-}
-
-.register-form-panel h2 {
-  margin: 25px 0 36px;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(29px, 3vw, 38px);
-  font-weight: 400;
-  letter-spacing: -1px;
-  color: #2b2623;
-}
-
-.register-form {
-  display: flex;
-  flex-direction: column;
-  gap: 19px;
-}
+/* ================= INPUT FIELDS ================= */
 
 .register-field {
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  gap: 8px;
 }
 
 .register-field label {
   display: flex;
   align-items: center;
-  gap: 10px;
-  color: #93776e;
-  font-size: 13px;
-}
-
-.register-field label svg {
-  color: #987d74;
+  gap: 9px;
+  color: #8e7b73;
+  font-size: 12px;
 }
 
 .register-field input {
   width: 100%;
-  height: 49px;
-  padding: 0 15px;
-  background: #fff;
-  border: 1px solid #e6d9d2;
+  height: 48px;
+  padding: 0 13px;
+  box-sizing: border-box;
+
+  border: 1px solid #e7dcd5;
   border-radius: 5px;
-  outline: none;
-  color: #302825;
+  background: #fff;
+
+  color: #302722;
   font-family: inherit;
   font-size: 14px;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
+  outline: none;
 
-.register-field input::placeholder {
-  color: #b49c94;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .register-field input:focus {
   border-color: #b5527a;
-  box-shadow: 0 0 0 3px rgba(181, 82, 122, 0.1);
+  box-shadow: 0 0 0 3px rgba(181, 82, 122, 0.08);
 }
 
-/* BUTTON */
+.register-field input::placeholder {
+  color: #b5a49c;
+}
+
+/* ================= SUBMIT BUTTON ================= */
 
 .register-submit {
   width: 100%;
-  min-height: 55px;
-  margin-top: 6px;
-  background: #b5527a;
+  min-height: 50px;
+  margin-top: 5px;
+
   border: none;
   border-radius: 5px;
-  color: white;
+
+  background: #b5527a;
+  color: #fff;
+
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 12px 24px rgba(181, 82, 122, 0.13);
-  transition: background 0.2s, transform 0.2s;
+
+  box-shadow: 0 12px 24px rgba(181, 82, 122, 0.14);
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
 }
 
 .register-submit:hover:not(:disabled) {
-  background: #9f4268;
+  background: #9e4168;
   transform: translateY(-1px);
 }
 
@@ -207,107 +113,75 @@
   cursor: not-allowed;
 }
 
+/* ================= ERROR MESSAGE ================= */
+
 .register-message {
   margin: 0;
-  color: #b3264a;
-  font-size: 13px;
+  color: #a53b56;
+  font-size: 12px;
+  line-height: 1.5;
 }
 
-.register-login-link {
-  margin: 28px 0 0;
-  color: #a18a80;
+/* ================= LOGIN LINK ================= */
+
+.register-login {
+  margin-top: 25px;
+  color: #9c8980;
   font-size: 13px;
   text-align: center;
 }
 
-.register-login-link a {
+.register-login a {
   color: #b5527a;
   font-weight: 700;
   text-decoration: none;
 }
 
-.register-login-link a:hover {
+.register-login a:hover {
   text-decoration: underline;
 }
 
-/* TABLET */
+/* ================= MOBILE ================= */
 
-@media (max-width: 1024px) {
-  .register-intro,
-  .register-form-panel {
-    padding: 55px 38px;
+@media (max-width: 650px) {
+  .register-content h2 {
+    font-size: 28px;
+    margin-bottom: 24px;
   }
 
-  .register-intro-content {
-    margin-top: 48px;
-  }
-}
-
-/* MOBILE */
-
-@media (max-width: 768px) {
-  .register-page {
-    padding: 24px 16px 48px;
+  .lookfit-register-form {
+    gap: 15px;
   }
 
-  .register-back {
-    margin-bottom: 20px;
-  }
-
-  .register-card {
-    grid-template-columns: 1fr;
-    min-height: auto;
-  }
-
-  .register-intro {
-    padding: 35px 28px;
-  }
-
-  .register-logo {
-    font-size: 27px;
-  }
-
-  .register-intro-content {
-    margin-top: 28px;
-  }
-
-  .register-intro h1 {
-    font-size: 37px;
-    margin: 18px 0;
-  }
-
-  .register-intro-content > p {
-    font-size: 14px;
-    line-height: 1.7;
-  }
-
-  .register-benefits {
-    margin-top: 25px;
-    gap: 12px;
-  }
-
-  .register-form-panel {
-    padding: 38px 28px 45px;
-  }
-
-  .register-form-panel h2 {
-    font-size: 31px;
-    margin: 18px 0 28px;
-  }
-
-  .register-form {
-    gap: 16px;
+  .register-field input {
+    height: 46px;
   }
 }
 
-@media (max-width: 380px) {
-  .register-intro,
-  .register-form-panel {
-    padding-left: 20px;
-    padding-right: 20px;
-  }
+/* REGISTER SPACING ADJUSTMENT */
 
-  .register-intro h1 {
-    font-size: 32px;
-  }
+.register-content h2 {
+  margin: 16px 0 22px;
+}
+
+.lookfit-register-form {
+  gap: 14px;
+}
+
+.register-field {
+  gap: 7px;
+}
+
+.register-field input {
+  height: 45px;
+}
+
+.register-submit {
+  min-height: 48px;
+  margin-top: 4px;
+}
+
+.register-login {
+  margin-top: 18px;
+  margin-bottom: 0;
 }

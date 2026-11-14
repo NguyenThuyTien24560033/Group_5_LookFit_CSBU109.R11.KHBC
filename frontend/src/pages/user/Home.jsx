@@ -1,247 +1,151 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { getPublicOutfits } from "../../services/outfit.service.js";
+import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Sparkles, Ruler, Clock3, ArrowRight } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
 import "./Home.css";
-
-const PAGE_SIZE = 10;
-
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:3000/api";
-
-function getItemImageUrl(item) {
-  if (!item) return null;
-  if (item.imageUrl && typeof item.imageUrl === "string" && item.imageUrl.trim()) {
-    return item.imageUrl.trim();
-  }
-  const imageId = item.imageId ?? item;
-  const id =
-    typeof imageId === "object"
-      ? imageId._id ?? imageId.id
-      : imageId;
-
-  return id ? `${API_BASE_URL}/images/${id}` : null;
-}
-
-function getErrorMessage(error) {
-  return error?.message || "Unable to load public outfits.";
-}
+import { useState } from "react";
 
 export default function Home() {
-  const navigate = useNavigate();
+const { user, logout } = useAuth();
+console.log("Current logged-in user:", user);
+const navigate = useNavigate();
+const [showLogout, setShowLogout] = useState(false);
 
-  const [outfits, setOutfits] = useState([]);
-  const [page, setPage] = useState(1);
 
-  const [pagination, setPagination] = useState({
-    page: 1,
-    pageSize: PAGE_SIZE,
-    totalOutfits: 0,
-    totalPages: 0,
-    hasNextPage: false,
-  });
-
-  const [loading, setLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState("");
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadPublicOutfits() {
-      setLoading(true);
-      setErrorMessage("");
-
-      try {
-        const result = await getPublicOutfits({
-          page,
-          pageSize: PAGE_SIZE,
-        });
-
-        if (cancelled) return;
-
-        const outfitList = Array.isArray(result)
-          ? result
-          : result?.outfits ?? result?.data?.outfits ?? result?.data ?? [];
-
-        const validOutfits = Array.isArray(outfitList)
-          ? outfitList
-          : [];
-
-        const paginationData =
-          result?.pagination ?? result?.data?.pagination ?? {};
-
-        const totalOutfits =
-          paginationData.totalOutfits ??
-          paginationData.total ??
-          validOutfits.length;
-
-        const totalPages =
-          paginationData.totalPages ??
-          Math.ceil(totalOutfits / PAGE_SIZE);
-
-        setOutfits(validOutfits);
-
-        setPagination({
-          page: paginationData.page ?? page,
-          pageSize: paginationData.pageSize ?? PAGE_SIZE,
-          totalOutfits,
-          totalPages,
-          hasNextPage:
-            paginationData.hasNextPage ?? page < totalPages,
-        });
-      } catch (error) {
-        if (!cancelled) {
-          setErrorMessage(getErrorMessage(error));
-          setOutfits([]);
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    }
-
-    loadPublicOutfits();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [page]);
-
-  function handleItemClick(item) {
-    const catalogId =
-      item.catalogId?._id ??
-      item.catalogId?.id ??
-      item.catalogId ??
-      item.productId?._id ??
-      item.productId?.id ??
-      item.productId;
-
-    if (!catalogId) {
-      console.warn("Cannot open item detail: catalogId is missing.", item);
-      return;
-    }
-
-    navigate(`/catalog/${catalogId}`);
+const handleLogout = async () => {
+  try {
+    await logout();
+  } finally {
+    setShowLogout(false);
+    navigate("/", { replace: true });
   }
+};
+
+  const userName = user?.name || "";
 
   return (
-    <section className="home-page">
-      <div className="home-hero">
-        <h1>Welcome to LFit</h1>
-        <p>Find your style, one outfit at a time.</p>
-      </div>
+    <div className="user-home">
+      <header className="user-home-header">
+        <div className="user-home-header-inner">
+          <Link to="/home" className="user-home-logo">
+  <img
+    src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/lookfit-logo-new-SgG0KVJPTSg9JSHg2oL4vzSMpzFO80.png"
+    alt="LookFit"
+  />
+</Link>
 
-      <section className="public-outfits">
-        <h2>Public Outfits</h2>
+          <nav className="user-home-nav">
+            <NavLink to="/home">Home</NavLink>
+            <NavLink to="/profile">Profile</NavLink>
+            <NavLink to="/recommendation">Recommendation</NavLink>
+            <NavLink to="/outfits/history">History</NavLink>
+          </nav>
 
-        {loading && <p>Loading public outfits...</p>}
+          
+<div className="user-home-account">
+  <button
+    type="button"
+    className="user-home-avatar-button"
+    onClick={() => setShowLogout((prev) => !prev)}
+    aria-label="Account menu"
+    aria-expanded={showLogout}
+  >
+    <span className="user-home-avatar">
+      {userName.charAt(0).toUpperCase() || "U"}
+    </span>
+  </button>
 
-        {!loading && errorMessage && (
-          <div className="home-error" role="alert">
-            <p>{errorMessage}</p>
+  {showLogout && (
+    <div className="user-home-dropdown">
+      <button
+        type="button"
+        className="user-home-logout"
+        onClick={handleLogout}
+      >
+        Log out
+      </button>
+    </div>
+  )}
+</div>
 
-            <button
-              type="button"
-              onClick={() => setPage((current) => current)}
-            >
-              Dismiss
-            </button>
-          </div>
-        )}
+        </div>
+      </header>
 
-        {!loading && !errorMessage && outfits.length === 0 && (
-          <p>No public outfits available yet.</p>
-        )}
+      <main className="user-home-main">
+        <p className="user-home-label">
+          PERSONAL DASHBOARD <span>•</span> LOOKFIT
+        </p>
 
-        {!loading && !errorMessage && outfits.length > 0 && (
-          <>
-            <p>Total public outfits: {pagination.totalOutfits}</p>
+        <h1 className="user-home-title">
+          Welcome back,{" "}
+          <span>{userName ? `${userName}.` : "."}</span>
+        </h1>
 
-            <div className="outfit-grid">
-              {outfits.map((outfit, outfitIndex) => (
-                <article
-                  className="public-outfit-card"
-                  key={outfit._id ?? outfit.id ?? outfitIndex}
-                >
-                  <h3>Outfit</h3>
+        <p className="user-home-description">
+          Your wardrobe is ready. Pick up where you left off or
+          find a fresh way to wear what you already own.
+        </p>
 
-                  <p>
-                    Created by: {outfit.user?.name || "Unknown user"}
-                  </p>
-
-                  <div className="public-outfit-items">
-                    {Array.isArray(outfit.items) &&
-                    outfit.items.length > 0 ? (
-                      outfit.items.map((item, index) => {
-                        const imageUrl = getItemImageUrl(item);
-
-                        return (
-                          <div
-                            className="public-outfit-item"
-                            key={item._id ?? item.id ?? index}
-                          >
-                            <button
-                              type="button"
-                              className="catalog-item-link"
-                              onClick={() => handleItemClick(item)}
-                              title="View product details"
-                            >
-                              <p>
-                                {item.category || "Item"}:{" "}
-                                {item.name || "Unnamed item"}
-                              </p>
-
-                              {imageUrl ? (
-                                <img
-                                  src={imageUrl}
-                                  alt={item.name || "Outfit item"}
-                                  loading="lazy"
-                                  decoding="async"
-                                  onError={(event) => {
-                                    event.currentTarget.style.display = "none";
-                                  }}
-                                />
-                              ) : (
-                                <p className="no-image">
-                                  No image available
-                                </p>
-                              )}
-                            </button>
-                          </div>
-                        );
-                      })
-                    ) : (
-                      <p>No items in this outfit.</p>
-                    )}
-                  </div>
-                </article>
-              ))}
-            </div>
-
-            <div className="pagination-controls">
-              <button
-                type="button"
-                onClick={() => setPage((current) => current - 1)}
-                disabled={page <= 1 || loading}
-              >
-                Previous
-              </button>
-
-              <span>
-                Page {pagination.page} of {pagination.totalPages}
+        <section className="user-home-cards">
+          <Link
+            to="/recommendation"
+            className="user-home-card user-home-card-primary"
+          >
+            <div className="user-home-card-top">
+              <span className="user-home-icon">
+                <Sparkles size={22} />
               </span>
-
-              <button
-                type="button"
-                onClick={() => setPage((current) => current + 1)}
-                disabled={!pagination.hasNextPage || loading}
-              >
-                Next
-              </button>
+              <ArrowRight size={22} />
             </div>
-          </>
-        )}
-      </section>
-    </section>
+
+            <div className="user-home-card-bottom">
+              <p className="user-home-card-label">QUICK STYLING</p>
+              <h2>Create a new look</h2>
+              <p className="user-home-card-description">
+                Build an outfit from your wardrobe in a few
+                thoughtful steps.
+              </p>
+            </div>
+          </Link>
+
+          <Link to="/profile" className="user-home-card">
+            <div className="user-home-card-top">
+              <span className="user-home-icon">
+                <Ruler size={22} />
+              </span>
+              <ArrowRight size={22} />
+            </div>
+
+            <div className="user-home-card-bottom">
+              <p className="user-home-card-label">YOUR FIT</p>
+              <h2>Complete your profile</h2>
+              <p className="user-home-card-description">
+                Add your measurements to make every
+                recommendation more personal.
+              </p>
+            </div>
+          </Link>
+
+          <Link
+            to="/outfits/history"
+            className="user-home-card user-home-card-muted"
+          >
+            <div className="user-home-card-top">
+              <span className="user-home-icon">
+                <Clock3 size={22} />
+              </span>
+              <ArrowRight size={22} />
+            </div>
+
+            <div className="user-home-card-bottom">
+              <p className="user-home-card-label">YOUR ACTIVITY</p>
+              <h2>See recent looks</h2>
+              <p className="user-home-card-description">
+                Revisit the combinations you saved and loved.
+              </p>
+            </div>
+          </Link>
+        </section>
+      </main>
+    </div>
   );
 }

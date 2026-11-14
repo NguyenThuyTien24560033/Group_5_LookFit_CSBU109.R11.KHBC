@@ -1,3 +1,4 @@
+
 import {
   createContext,
   useContext,
@@ -14,6 +15,18 @@ import api from "../services/api";
 
 const AuthContext = createContext(null);
 
+// Chỉ cho phép Mock Login trong môi trường development
+const USE_MOCK_AUTH =
+  import.meta.env.DEV &&
+  import.meta.env.VITE_USE_MOCK_AUTH === "true";
+
+const MOCK_USER = {
+  id: "mock-user-001",
+  name: "LOOKFIT Demo",
+  email: "demo@lookfit.local",
+  role: "USER",
+};
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -22,6 +35,18 @@ export function AuthProvider({ children }) {
     let cancelled = false;
 
     async function restoreSession() {
+      if (USE_MOCK_AUTH) {
+        const mockLoggedIn =
+          sessionStorage.getItem("lookfit_mock_login") === "true";
+
+        if (!cancelled) {
+          setUser(mockLoggedIn ? MOCK_USER : null);
+          setLoading(false);
+        }
+
+        return;
+      }
+
       const token = localStorage.getItem("token");
 
       if (!token) {
@@ -56,6 +81,21 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = async (credentials) => {
+    if (USE_MOCK_AUTH) {
+      const mockUser = {
+        ...MOCK_USER,
+        email: credentials.email || MOCK_USER.email,
+      };
+
+      sessionStorage.setItem("lookfit_mock_login", "true");
+      setUser(mockUser);
+
+      return {
+        token: "mock-development-token",
+        user: mockUser,
+      };
+    }
+
     const result = await loginService(credentials);
 
     if (!result?.token || !result?.user) {
@@ -68,6 +108,12 @@ export function AuthProvider({ children }) {
   };
 
   const logout = async () => {
+    if (USE_MOCK_AUTH) {
+      sessionStorage.removeItem("lookfit_mock_login");
+      setUser(null);
+      return;
+    }
+
     try {
       await logoutService();
     } finally {
