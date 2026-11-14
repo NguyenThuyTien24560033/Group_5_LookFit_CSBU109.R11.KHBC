@@ -1,40 +1,155 @@
-import { useState } from "react";
+
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getRecommendations } from "../../services/recommendation.service.js";
 import { createOutfit } from "../../services/outfit.service.js";
 import "./RecommendationResult.css";
 
+// ================= PREVIEW MODE =================
+// true: Xem giao diện bằng dữ liệu mẫu, không cần backend
+// false: Sử dụng dữ liệu thật từ API
+const PREVIEW_MODE = true;
+
+// ================= MOCK DATA =================
+
+const mockRecommendations = [
+  {
+    name: "The Easy Essential",
+    totalScore: 96,
+    itemScore: 48,
+    colorScore: 48,
+    imageUrl:
+      "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=700",
+    items: [
+      { name: "Cotton tee", category: "Top" },
+      { name: "Straight denim", category: "Bottom" },
+      { name: "Casual jacket", category: "Outerwear" },
+    ],
+  },
+  {
+    name: "Warm Weekend Edit",
+    totalScore: 93,
+    itemScore: 46,
+    colorScore: 47,
+    imageUrl:
+      "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=700",
+    items: [
+      { name: "Cozy coat", category: "Outerwear" },
+      { name: "Classic trousers", category: "Bottom" },
+      { name: "Leather bag", category: "Accessories" },
+    ],
+  },
+  {
+    name: "Quietly Polished",
+    totalScore: 91,
+    itemScore: 45,
+    colorScore: 46,
+    imageUrl:
+      "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=700",
+    items: [
+      { name: "Floral dress", category: "Dress" },
+      { name: "Elegant accessories", category: "Accessories" },
+    ],
+  },
+  {
+    name: "Campus to Coffee",
+    totalScore: 88,
+    itemScore: 44,
+    colorScore: 44,
+    imageUrl:
+      "https://images.unsplash.com/photo-1445205170230-053b83016050?w=700",
+    items: [
+      { name: "White shirt", category: "Top" },
+      { name: "Denim jeans", category: "Bottom" },
+      { name: "Everyday sneakers", category: "Shoes" },
+    ],
+  },
+];
+
+const mockCriteria = {
+  case: "casual",
+  style: "basic",
+  season: "summer",
+  weather: "warm",
+  lifestyle: "student",
+};
+
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
+// ================= IMAGE HELPER =================
+
 function getItemImageUrl(item) {
   if (!item) return "";
-  if (item.imageUrl && typeof item.imageUrl === "string" && item.imageUrl.trim()) {
+
+  if (
+    item.imageUrl &&
+    typeof item.imageUrl === "string" &&
+    item.imageUrl.trim()
+  ) {
     return item.imageUrl.trim();
   }
+
   const id =
     typeof item === "string"
       ? item
       : item.imageId?._id ?? item.imageId?.id ?? item.imageId;
+
   return id ? `${API_BASE_URL}/images/${id}` : "";
 }
+
+// ================= COMPONENT =================
 
 function RecommendationResult() {
   const { state } = useLocation();
   const navigate = useNavigate();
+const [showBackToTop, setShowBackToTop] = useState(false);
 
-  const criteria = state?.criteria;
-  const initialRecommendations = state?.recommendations ?? [];
-
-  const initialPagination = state?.pagination ?? {
-    page: 1,
-    pageSize: 4,
-    totalOutfits: initialRecommendations.length,
-    totalPages: 1,
-    hasNextPage: false,
+useEffect(() => {
+  const handleScroll = () => {
+    setShowBackToTop(window.scrollY > 250);
   };
 
-  const [recommendationGroupId] = useState(() => crypto.randomUUID());
+  window.addEventListener("scroll", handleScroll, { passive: true });
+  handleScroll();
+
+  return () => window.removeEventListener("scroll", handleScroll);
+}, []);
+
+const scrollToTop = () => {
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
+};
+  // Dùng mock data khi Preview Mode bật
+  const criteria = PREVIEW_MODE
+    ? mockCriteria
+    : state?.criteria;
+
+  const initialRecommendations = PREVIEW_MODE
+    ? mockRecommendations
+    : state?.recommendations ?? [];
+
+  const initialPagination = PREVIEW_MODE
+    ? {
+        page: 1,
+        pageSize: 4,
+        totalOutfits: mockRecommendations.length,
+        totalPages: 1,
+        hasNextPage: false,
+      }
+    : state?.pagination ?? {
+        page: 1,
+        pageSize: 4,
+        totalOutfits: initialRecommendations.length,
+        totalPages: 1,
+        hasNextPage: false,
+      };
+
+  const [recommendationGroupId] = useState(() =>
+    crypto.randomUUID()
+  );
 
   const [recommendations, setRecommendations] = useState(
     initialRecommendations
@@ -45,16 +160,26 @@ function RecommendationResult() {
   const [savingIndex, setSavingIndex] = useState(null);
   const [message, setMessage] = useState("");
 
+  // ================= LOAD RECOMMENDATIONS =================
+
   const loadRecommendationPage = async (targetPage) => {
     if (loading || savingIndex !== null || !criteria) return;
+
+    if (PREVIEW_MODE) {
+      return;
+    }
 
     setLoading(true);
     setMessage("");
 
     try {
-      const result = await getRecommendations(criteria, targetPage);
+      const result = await getRecommendations(
+        criteria,
+        targetPage
+      );
 
       setRecommendations(result.recommendations ?? []);
+
       setPagination(
         result.pagination ?? {
           page: targetPage,
@@ -66,12 +191,15 @@ function RecommendationResult() {
       );
     } catch (error) {
       setMessage(
-        error.message || "Unable to load outfits. Please try again."
+        error.message ||
+          "Unable to load outfits. Please try again."
       );
     } finally {
       setLoading(false);
     }
   };
+
+  // ================= PAGINATION =================
 
   const handleNext = () => {
     if (pagination.hasNextPage) {
@@ -85,8 +213,17 @@ function RecommendationResult() {
     }
   };
 
+  // ================= SAVE OUTFIT =================
+
   const handleSave = async (outfit, index) => {
-    if (savingIndex !== null || loading) return;
+    if (PREVIEW_MODE) {
+      setMessage(
+        "Preview mode: Saving outfits will be available when the backend is connected."
+      );
+      return;
+    }
+
+    if (savingIndex !== null || loading || !criteria) return;
 
     setSavingIndex(index);
     setMessage("");
@@ -96,8 +233,13 @@ function RecommendationResult() {
         id: item.id ?? item._id,
       }));
 
-      if (items.length === 0 || items.some((item) => !item.id)) {
-        setMessage("This outfit has invalid item data and cannot be saved.");
+      if (
+        items.length === 0 ||
+        items.some((item) => !item.id)
+      ) {
+        setMessage(
+          "This outfit has invalid item data and cannot be saved."
+        );
         return;
       }
 
@@ -115,128 +257,308 @@ function RecommendationResult() {
       });
     } catch (error) {
       setMessage(
-        error.message || "Unable to save outfit. Please try again."
+        error.message ||
+          "Unable to save outfit. Please try again."
       );
     } finally {
       setSavingIndex(null);
     }
   };
 
+  // ================= MISSING CRITERIA =================
+
   if (!criteria) {
     return (
-      <main>
-        <h1>Recommended Outfits</h1>
-        <p>Recommendation criteria are missing. Please try again.</p>
+      <main className="result-page">
+        <div className="result-container">
+          <button
+            type="button"
+            className="result-back"
+            onClick={() => navigate("/recommendation")}
+          >
+            ← Back
+          </button>
 
-        <button
-          type="button"
-          onClick={() => navigate("/recommendation")}
-        >
-          Back to Criteria
-        </button>
+          <div className="result-empty">
+            <p className="result-eyebrow">
+              CURATED FOR YOU
+            </p>
+
+            <h1>
+              Your outfit <em>matches.</em>
+            </h1>
+
+            <p>
+              Recommendation criteria are missing.
+              Please choose your preferences again.
+            </p>
+
+            <button
+              type="button"
+              className="result-retry"
+              onClick={() => navigate("/recommendation")}
+            >
+              Choose Preferences →
+            </button>
+          </div>
+        </div>
       </main>
     );
   }
 
+  // ================= MAIN UI =================
+
   return (
-    <main>
-      <h1>Recommended Outfits</h1>
+    <main className="result-page">
+      <div className="result-container">
 
-      <p>Outfits are sorted by total score, highest first.</p>
+        {/* BACK BUTTON */}
+        <button
+          type="button"
+          className="result-back"
+          onClick={() => navigate("/recommendation")}
+          disabled={loading || savingIndex !== null}
+        >
+          ← Back
+        </button>
 
-      <button
-        type="button"
-        onClick={() => navigate("/recommendation")}
-        disabled={savingIndex !== null || loading}
-      >
-        Back to Criteria
-      </button>
+        {/* PAGE HEADER */}
+        <header className="result-header">
+          <p className="result-eyebrow">
+            CURATED FOR YOU
+          </p>
 
-      {message && <p role="alert">{message}</p>}
+          <h1>
+            Your outfit <em>matches.</em>
+          </h1>
 
-      {loading && <p>Loading recommendations...</p>}
+          <div className="result-header-bottom">
+            <p>
+              Looks selected for your occasion,
+              style and lifestyle.
+            </p>
 
-      {!loading && recommendations.length === 0 && (
-        <p>No recommendations found. Please try again.</p>
-      )}
+            <span className="result-count">
+              {pagination.totalOutfits ??
+                recommendations.length}{" "}
+              recommendations
+            </span>
+          </div>
+        </header>
 
-      {!loading &&
-        recommendations.map((outfit, index) => (
-          <article key={`${pagination.page}-${index}`}>
-            <h2>
-              Outfit {index + 1 + (pagination.page - 1) * 4}
-            </h2>
+        {/* MESSAGE */}
+        {message && (
+          <p className="result-message" role="alert">
+            {message}
+          </p>
+        )}
 
-            {(outfit.items ?? []).map((item, itemIndex) => {
-              const imageUrl = getItemImageUrl(item);
+        {/* LOADING */}
+        {loading && (
+          <p className="result-loading">
+            Finding your perfect looks...
+          </p>
+        )}
 
-              return (
-                <div key={item.id ?? item._id ?? itemIndex}>
-                  <p>
-                    {item.name} — {item.category}
-                  </p>
+        {/* EMPTY RESULTS */}
+        {!loading && recommendations.length === 0 && (
+          <div className="result-empty">
+            <h2>No outfits found</h2>
 
-                  {imageUrl ? (
-                    <img
-                      src={imageUrl}
-                      alt={item.name || "Outfit item"}
-                      width="150"
-                      loading="lazy"
-                      decoding="async"
-                      onError={(event) => {
-                        event.currentTarget.style.display = "none";
-                      }}
-                    />
-                  ) : (
-                    <p>No image available</p>
-                  )}
-                </div>
-              );
-            })}
-
-            <p>Item score: {outfit.itemScore}</p>
-            <p>Color harmony: {outfit.colorScore}</p>
-            <p>Total score: {outfit.totalScore}</p>
+            <p>
+              Try choosing different preferences.
+            </p>
 
             <button
               type="button"
-              onClick={() => handleSave(outfit, index)}
-              disabled={savingIndex !== null || loading}
+              className="result-retry"
+              onClick={() => navigate("/recommendation")}
             >
-              {savingIndex === index ? "Saving..." : "Save"}
+              Try Again →
             </button>
-          </article>
-        ))}
+          </div>
+        )}
 
-      <div>
-        <button
-          type="button"
-          onClick={handlePrevious}
-          disabled={
-            loading ||
-            savingIndex !== null ||
-            pagination.page <= 1
-          }
-        >
-          Previous
-        </button>
+        {/* ================= OUTFIT CARDS ================= */}
 
-        <span>
-          {" "}Page {pagination.page} of {pagination.totalPages}{" "}
-        </span>
+        {!loading && recommendations.length > 0 && (
+          <div className="result-grid">
+            {recommendations.map((outfit, index) => {
+              const items = outfit.items ?? [];
 
-        <button
-          type="button"
-          onClick={handleNext}
-          disabled={
-            loading ||
-            savingIndex !== null ||
-            !pagination.hasNextPage
-          }
-        >
-          Next
-        </button>
+              // Ưu tiên ảnh mock khi Preview Mode bật
+              const coverImage =
+                outfit.imageUrl ||
+                items.map(getItemImageUrl).find(Boolean);
+
+              const outfitNumber =
+                index +
+                1 +
+                (pagination.page - 1) *
+                  (pagination.pageSize || 4);
+
+              const score = Number(outfit.totalScore);
+
+              const displayScore = Number.isFinite(score)
+                ? score.toFixed(1)
+                : null;
+
+              return (
+                <article
+                  className="result-card"
+                  key={`${pagination.page}-${index}`}
+                >
+
+                  {/* IMAGE */}
+                  <div className="result-card-image">
+                    {coverImage ? (
+                      <img
+                        src={coverImage}
+                        alt={`Recommended outfit ${outfitNumber}`}
+                        loading="lazy"
+                        decoding="async"
+                        onError={(event) => {
+                          event.currentTarget.style.display =
+                            "none";
+                        }}
+                      />
+                    ) : (
+                      <div className="result-image-placeholder">
+                        LOOKFIT
+                      </div>
+                    )}
+
+                    {/* SCORE */}
+                    {displayScore !== null && (
+                      <span className="result-score">
+                        ✓ {displayScore} pts
+                      </span>
+                    )}
+
+                    {/* SAVE HEART */}
+                    <button
+                      type="button"
+                      className="result-heart"
+                      title="Save outfit"
+                      aria-label={`Save outfit ${outfitNumber}`}
+                      onClick={() =>
+                        handleSave(outfit, index)
+                      }
+                      disabled={
+                        loading || savingIndex !== null
+                      }
+                    >
+                      {savingIndex === index ? "…" : "♡"}
+                    </button>
+                  </div>
+
+                  {/* CARD CONTENT */}
+                  <div className="result-card-content">
+                    <h2>
+                      {outfit.name ||
+                        `Your Look ${outfitNumber}`}
+                    </h2>
+
+                    <p className="result-card-description">
+                      {items.length > 0
+                        ? items
+                            .map(
+                              (item) =>
+                                item.name ||
+                                item.category ||
+                                "Fashion item"
+                            )
+                            .join(" · ")
+                        : "A look curated for your style."}
+                    </p>
+
+                    {/* SCORES */}
+                    <div className="result-card-scores">
+                      {outfit.itemScore != null && (
+                        <span>
+                          Item score: {outfit.itemScore}
+                        </span>
+                      )}
+
+                      {outfit.colorScore != null && (
+                        <span>
+                          Color harmony: {outfit.colorScore}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* FOOTER */}
+                    <div className="result-card-footer">
+                      <span>
+                        {items.length} items
+                      </span>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleSave(outfit, index)
+                        }
+                        disabled={
+                          loading || savingIndex !== null
+                        }
+                      >
+                        {savingIndex === index
+                          ? "Saving..."
+                          : "Save Look"}
+                      </button>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
+
+        {/* ================= PAGINATION ================= */}
+
+        <div className="result-pagination">
+          <button
+            type="button"
+            onClick={handlePrevious}
+            disabled={
+              loading ||
+              savingIndex !== null ||
+              pagination.page <= 1
+            }
+          >
+            ← Previous
+          </button>
+
+          <span>
+            Page {pagination.page} of{" "}
+            {pagination.totalPages}
+          </span>
+
+          <button
+            type="button"
+            onClick={handleNext}
+            disabled={
+              loading ||
+              savingIndex !== null ||
+              !pagination.hasNextPage
+            }
+          >
+            Next →
+          </button>
+        </div>
+
       </div>
+   {showBackToTop && (
+  <button
+    type="button"
+    className="recommendation-back-to-top"
+    onClick={scrollToTop}
+    aria-label="Back to top"
+    title="Back to top"
+  >
+    ↑
+  </button>
+)}
     </main>
   );
 }
