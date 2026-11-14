@@ -26,14 +26,10 @@ import { useAuth } from "./context/AuthContext.jsx";
 
 import "./App.css";
 
-/* ================= LANDING ROUTE ================= */
-
 function LandingRoute() {
   const { isAuthenticated, isAdmin, loading } = useAuth();
 
-  if (loading) {
-    return null;
-  }
+  if (loading) return null;
 
   if (isAuthenticated) {
     return (
@@ -47,30 +43,17 @@ function LandingRoute() {
   return <Header />;
 }
 
-/* ================= APP ================= */
-
 export default function App() {
   return (
     <main className="app-main">
       <Routes>
+        {/* PUBLIC LANDING */}
+        <Route path="/" element={<LandingRoute />} />
 
-        {/* PUBLIC LANDING PAGE */}
-        <Route
-          path="/"
-          element={<LandingRoute />}
-        />
-
-        {/* LOGIN & REGISTER - SHARED LAYOUT */}
+        {/* LOGIN & REGISTER */}
         <Route element={<UserLayout />}>
-          <Route
-            path="/login"
-            element={<Login />}
-          />
-
-          <Route
-            path="/register"
-            element={<Register />}
-          />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
         </Route>
 
         {/* PUBLIC CATALOG */}
@@ -79,67 +62,55 @@ export default function App() {
           element={<CatalogItemDetail />}
         />
 
-        {/* USER PAGES */}
-        <Route element={<ProtectedRoute />}>
+        {/* PROTECTED USER PAGES */}
+<Route element={<ProtectedRoute />}>
 
-          <Route
-            path="/home"
-            element={<Home />}
-          />
+  {/* Home dashboard */}
+  <Route path="/home" element={<Home />} />
 
-          <Route
-            path="/profile"
-            element={<Profile />}
-          />
+  {/* Other pages share the Home navigation */}
+  <Route element={<Home showDashboard={false} />}>
 
-          <Route
-            path="/recommendation"
-            element={<Recommendation />}
-          />
+    <Route path="/profile" element={<Profile />} />
 
-          <Route
-            path="/recommendation/result"
-            element={<RecommendationResult />}
-          />
+    <Route
+      path="/recommendation"
+      element={<Recommendation />}
+    />
 
-          <Route
-            path="/outfits/history"
-            element={<OutfitHistory />}
-          />
+    <Route
+      path="/recommendation/result"
+      element={<RecommendationResult />}
+    />
 
-          <Route
-            path="/outfits/:id/edit"
-            element={<OutfitEdit />}
-          />
+    <Route
+      path="/outfits/history"
+      element={<OutfitHistory />}
+    />
 
-        </Route>
+    <Route
+      path="/outfits/:id/edit"
+      element={<OutfitEdit />}
+    />
+
+  </Route>
+
+</Route>
 
         {/* ADMIN PAGES */}
         <Route element={<AdminRoute />}>
-
-          <Route
-            path="/admin"
-            element={<Dashboard />}
-          />
+          <Route path="/admin" element={<Dashboard />} />
 
           <Route
             path="/admin/predefined-outfits"
             element={<PredefinedOutfits />}
           />
 
-          <Route
-            path="/admin/users"
-            element={<Users />}
-          />
-
+          <Route path="/admin/users" element={<Users />} />
         </Route>
 
         {/* UNKNOWN ROUTES */}
-        <Route
-          path="*"
-          element={<Navigate to="/" replace />}
-        />
-
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </main>
   );

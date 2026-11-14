@@ -428,3 +428,90 @@
     font-size: 26px;
   }
 }
+
+/* Shared user navigation */
+
+.user-home-header {
+  position: relative;
+  z-index: 100;
+}
+
+.user-home-account {
+  position: relative;
+}
+
+.user-home-dropdown {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  z-index: 101;
+}
+
+/* KEEP USER NAVIGATION FIXED */
+
+.user-home-header {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+  background: #fffdfb;
+  border-bottom: 1px solid #eaded8;
+}
+
+.user-home-header-inner {
+  width: min(1320px, calc(100% - 48px));
+  margin: 0 auto;
+}
+
+/* Keep navigation position consistent */
+.user-home-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 36px;
+}
+
+/* Keep avatar dropdown above page content */
+.user-home-account {
+  position: relative;
+}
+
+.user-home-dropdown {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  z-index: 1001;
+}
+
+/* Keep navigation dimensions consistent */
+.user-home-header {
+  width: 100%;
+  height: 94px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: #fffdfb;
+  box-sizing: border-box;
+}
+
+.user-home-header-inner {
+  width: min(1320px, calc(100% - 48px));
+  height: 100%;
+  margin: 0 auto;
+
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+}
+
+.user-home-logo {
+  justify-self: start;
+}
+
+.user-home-nav {
+  justify-self: center;
+}
+
+.user-home-account {
+  justify-self: end;
+}

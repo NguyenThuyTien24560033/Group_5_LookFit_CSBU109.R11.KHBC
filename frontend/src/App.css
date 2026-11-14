@@ -141,3 +141,13 @@ video {
     --lookfit-page-gutter: 16px;
   }
 }
+
+/* Reserve scrollbar space on every page */
+html {
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
+}
+
+body {
+  margin: 0;
+}

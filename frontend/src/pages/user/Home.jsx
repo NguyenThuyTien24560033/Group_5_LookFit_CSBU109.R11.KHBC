@@ -1,10 +1,10 @@
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { Sparkles, Ruler, Clock3, ArrowRight } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import "./Home.css";
 import { useState } from "react";
 
-export default function Home() {
+export default function Home({ showDashboard = true }) {
 const { user, logout } = useAuth();
 console.log("Current logged-in user:", user);
 const navigate = useNavigate();
@@ -70,7 +70,9 @@ const handleLogout = async () => {
         </div>
       </header>
 
-      <main className="user-home-main">
+{showDashboard ? (
+  <main className="user-home-main">
+
         <p className="user-home-label">
           PERSONAL DASHBOARD <span>•</span> LOOKFIT
         </p>
@@ -146,6 +148,11 @@ const handleLogout = async () => {
           </Link>
         </section>
       </main>
+        
+) : (
+  <Outlet />
+)}
     </div>
   );
 }
+

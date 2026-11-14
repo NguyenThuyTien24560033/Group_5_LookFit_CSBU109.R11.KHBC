@@ -1,4 +1,7 @@
+
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { ArrowLeft, Ruler, Save } from "lucide-react";
 import {
   createProfile,
   updateProfile,
@@ -16,28 +19,36 @@ const initialForm = {
 };
 
 const COLOR_OPTIONS = [
-  { value: "black", label: "Black" },
-  { value: "white", label: "White" },
-  { value: "gray", label: "Gray" },
-  { value: "beige", label: "Beige" },
-  { value: "brown", label: "Brown" },
-  { value: "navy", label: "Navy" },
-  { value: "red", label: "Red" },
-  { value: "orange", label: "Orange" },
-  { value: "yellow", label: "Yellow" },
-  { value: "pink", label: "Pink" },
-  { value: "blue", label: "Blue" },
-  { value: "green", label: "Green" },
-  { value: "purple", label: "Purple" },
+  { value: "black", label: "Black", hex: "#202020" },
+  { value: "white", label: "White", hex: "#ffffff" },
+  { value: "blue", label: "Blue", hex: "#7da6c8" },
+  { value: "navy", label: "Navy", hex: "#293e60" },
+  { value: "beige", label: "Beige", hex: "#e6d4c0" },
+  { value: "brown", label: "Brown", hex: "#89614d" },
+  { value: "pink", label: "Pink", hex: "#d59bb0" },
+  { value: "green", label: "Green", hex: "#8fa68b" },
+  { value: "gray", label: "Grey", hex: "#9d9d9d" },
+  { value: "yellow", label: "Mustard", hex: "#d6aa38" },
+  { value: "olive", label: "Olive", hex: "#808b50" },
+  { value: "burgundy", label: "Burgundy", hex: "#743047" },
+  { value: "purple", label: "Lavender", hex: "#b6a4d1" },
+  { value: "peach", label: "Peach", hex: "#f1b49e" },
+  { value: "orange", label: "Rust", hex: "#ac6046" },
+  { value: "teal", label: "Teal", hex: "#609e98" },
+  { value: "red", label: "Red", hex: "#c54c53" },
 ];
 
-const bodyShapeLabels = {
-  hourglass: "Hourglass",
-  pear: "Pear",
-  "inverted-triangle": "Inverted Triangle",
-  rectangle: "Rectangle",
-  apple: "Apple",
-};
+const MEASUREMENTS = [
+  { name: "height", label: "Height", unit: "cm" },
+  { name: "weight", label: "Weight", unit: "kg" },
+  { name: "bust", label: "Bust", unit: "cm" },
+  { name: "waist", label: "Waist", unit: "cm" },
+  { name: "hip", label: "Hips", unit: "cm" },
+];
+
+function readProfile(result) {
+  return result?.data ?? result?.profile ?? result;
+}
 
 export default function Profile() {
   const [form, setForm] = useState(initialForm);
@@ -45,12 +56,9 @@ export default function Profile() {
   const [hasProfile, setHasProfile] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [editing, setEditing] = useState(true);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("info");
-
-  function readProfile(result) {
-    return result?.data ?? result?.profile ?? result;
-  }
 
   function applyProfile(profile) {
     setForm({
@@ -60,12 +68,15 @@ export default function Profile() {
       waist: profile.waist ?? "",
       hip: profile.hip ?? "",
       favoriteColors: Array.isArray(profile.favoriteColors)
-        ? profile.favoriteColors.map((c) => String(c).toLowerCase())
+        ? profile.favoriteColors.map((c) =>
+            String(c).toLowerCase()
+          )
         : [],
     });
 
     setBodyShape(profile.bodyShape ?? "");
     setHasProfile(true);
+    setEditing(false);
   }
 
   useEffect(() => {
@@ -85,31 +96,32 @@ export default function Profile() {
           profile.waist == null ||
           profile.hip == null
         ) {
-          throw new Error("Profile response does not contain valid profile data.");
+          throw new Error(
+            "Profile response does not contain valid profile data."
+          );
         }
 
         if (cancelled) return;
-
         applyProfile(profile);
-        setMessage("Profile loaded successfully.");
-        setMessageType("success");
+        setMessage("");
       } catch (error) {
         if (cancelled) return;
 
         if (error.status === 404) {
-          setForm(initialForm);
-          setBodyShape("");
+          setForm({ ...initialForm, favoriteColors: [] });
           setHasProfile(false);
-          setMessage("No profile found. Please create your profile.");
+          setEditing(true);
+          setMessage("No profile found. Create your profile.");
           setMessageType("info");
         } else {
-          setMessage(error.message || "Unable to load profile.");
-          setMessageType("error");
+          setMessage(
+            "Backend is unavailable. You can still preview and edit the form."
+          );
+          setMessageType("info");
+          setEditing(true);
         }
       } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
+        if (!cancelled) setLoading(false);
       }
     }
 
@@ -130,13 +142,13 @@ export default function Profile() {
   }
 
   function handleColorChange(colorValue) {
-    const normalized = colorValue.toLowerCase();
-
     setForm((previous) => ({
       ...previous,
-      favoriteColors: previous.favoriteColors.includes(normalized)
-        ? previous.favoriteColors.filter((item) => item !== normalized)
-        : [...previous.favoriteColors, normalized],
+      favoriteColors: previous.favoriteColors.includes(colorValue)
+        ? previous.favoriteColors.filter(
+            (item) => item !== colorValue
+          )
+        : [...previous.favoriteColors, colorValue],
     }));
   }
 
@@ -147,26 +159,20 @@ export default function Profile() {
       bust: Number(form.bust),
       waist: Number(form.waist),
       hip: Number(form.hip),
-      favoriteColors: form.favoriteColors.map((c) => c.toLowerCase()),
+      favoriteColors: form.favoriteColors,
     };
   }
 
   function validateForm() {
-    const measurements = [
-      ["Height", form.height],
-      ["Weight", form.weight],
-      ["Bust", form.bust],
-      ["Waist", form.waist],
-      ["Hip", form.hip],
-    ];
+    for (const { name, label } of MEASUREMENTS) {
+      const value = form[name];
 
-    for (const [label, value] of measurements) {
       if (
         value === "" ||
         !Number.isFinite(Number(value)) ||
         Number(value) <= 0
       ) {
-        setMessage(`${label} must be a number greater than zero.`);
+        setMessage(`${label} must be greater than zero.`);
         setMessageType("error");
         return false;
       }
@@ -190,21 +196,15 @@ export default function Profile() {
 
       const profile = readProfile(result);
 
-      if (profile?.bodyShape) {
-        setBodyShape(profile.bodyShape);
-      } else {
-        const latestResult = await getProfile();
-        const latestProfile = readProfile(latestResult);
-
-        if (latestProfile?.bodyShape) {
-          setBodyShape(latestProfile.bodyShape);
-        }
-      }
-
       if (profile?.height != null) {
         applyProfile(profile);
       } else {
         setHasProfile(true);
+        setEditing(false);
+      }
+
+      if (profile?.bodyShape) {
+        setBodyShape(profile.bodyShape);
       }
 
       setMessage(
@@ -214,94 +214,167 @@ export default function Profile() {
       );
       setMessageType("success");
     } catch (error) {
-      if (error.status === 409) {
-        setMessage(
-          "A profile already exists. Reload the page to retrieve it."
-        );
-      } else {
-        setMessage(error.message || "Unable to save profile.");
-      }
-
+      setMessage(error.message || "Unable to save profile.");
       setMessageType("error");
     } finally {
       setSaving(false);
     }
   }
 
-  if (loading) {
-    return (
-      <main className="profile-page">
-        <p>Loading profile...</p>
-      </main>
-    );
-  }
-
   return (
-    <main className="profile-page">
-      <section className="profile-card">
-        <h1>My Profile</h1>
-        <p>Manage your measurements and style preferences.</p>
+    <main className="lookfit-profile-page">
+      <div className="lookfit-profile-container">
+        <Link to="/home" className="profile-back-button">
+          <ArrowLeft size={18} />
+          Back
+        </Link>
 
-        <form onSubmit={handleSubmit} className="profile-form">
-          {[
-            ["height", "Height (cm)"],
-            ["weight", "Weight (kg)"],
-            ["bust", "Bust (cm)"],
-            ["waist", "Waist (cm)"],
-            ["hip", "Hip (cm)"],
-          ].map(([name, label]) => (
-            <div className="profile-field" key={name}>
-              <label htmlFor={name}>{label}</label>
-              <input
-                id={name}
-                name={name}
-                type="number"
-                min="0.1"
-                step="any"
-                value={form[name]}
-                onChange={handleChange}
-                required
-              />
+        <div className="profile-heading">
+          <p className="profile-eyebrow">
+            YOUR PROFILE <span>•</span> PERSONAL FIT
+          </p>
+
+          <h1>
+            Make it feel <em>like you.</em>
+          </h1>
+
+          <p className="profile-subtitle">
+            Add your measurements and color preferences so every
+            LookFit recommendation feels more personal.
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="profile-layout">
+          <section className="profile-measurements-card">
+            <div className="profile-card-heading">
+              <div>
+                <h2>Your measurements</h2>
+                <p>
+                  Use centimeters and kilograms for the best fit.
+                </p>
+              </div>
+
+              <span className="profile-measure-icon">
+                <Ruler size={22} />
+              </span>
             </div>
-          ))}
 
-          <fieldset className="profile-colors">
-            <legend>Favorite Colors</legend>
+            <div className="profile-measurement-grid">
+              {MEASUREMENTS.map(({ name, label, unit }) => (
+                <div className="profile-measure-field" key={name}>
+                  <label htmlFor={name}>{label}</label>
 
-            <div className="profile-color-list">
-              {COLOR_OPTIONS.map(({ value, label }) => (
-                <label key={value} className="profile-color-option">
-                  <input
-                    type="checkbox"
-                    checked={form.favoriteColors.includes(value)}
-                    onChange={() => handleColorChange(value)}
-                  />
-                  {label}
-                </label>
+                  <div className="profile-input-wrap">
+                    <input
+                      id={name}
+                      name={name}
+                      type="number"
+                      min="0.1"
+                      step="any"
+                      placeholder={unit}
+                      value={form[name]}
+                      onChange={handleChange}
+                      disabled={!editing || saving}
+                      required
+                    />
+                    <span>{unit.toUpperCase()}</span>
+                  </div>
+                </div>
               ))}
             </div>
-          </fieldset>
 
-          <div className="profile-actions">
-            <button type="submit" disabled={saving}>
-              {saving
-                ? "Saving..."
-                : hasProfile
-                  ? "Save Changes"
-                  : "Create Profile"}
-            </button>
+            {bodyShape && (
+              <p className="profile-body-shape">
+                Body shape:{" "}
+                <strong>
+                  {bodyShape.replace(/-/g, " ")}
+                </strong>
+              </p>
+            )}
+          </section>
+
+          <div className="profile-right-column">
+            <section className="profile-preferences-card">
+              <h2>Color preferences</h2>
+              <p>Choose the colors you reach for most.</p>
+
+              <div className="profile-color-grid">
+                {COLOR_OPTIONS.map(({ value, label, hex }) => {
+                  const selected =
+                    form.favoriteColors.includes(value);
+
+                  return (
+                    <label
+                      key={value}
+                      className={`profile-color-pill ${
+                        selected ? "selected" : ""
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selected}
+                        onChange={() =>
+                          handleColorChange(value)
+                        }
+                        disabled={!editing || saving}
+                      />
+
+                      <span
+                        className="profile-color-dot"
+                        style={{ backgroundColor: hex }}
+                      />
+
+                      <span>{label}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            </section>
+
+            <section className="profile-save-card">
+              <div className="profile-save-description">
+                <strong>Ready to update?</strong>
+                <p>
+                  Review your measurements and preferences first.
+                </p>
+              </div>
+
+              <div className="profile-save-buttons">
+                <button
+                  type="button"
+                  className="profile-edit-button"
+                  onClick={() => setEditing(true)}
+                  disabled={editing || saving}
+                >
+                  Edit Profile
+                </button>
+
+                <button
+                  type="submit"
+                  className="profile-save-button"
+                  disabled={!editing || saving}
+                >
+                  <Save size={17} />
+                  {saving
+                    ? "Saving..."
+                    : hasProfile
+                      ? "Save Changes"
+                      : "Create Profile"}
+                </button>
+              </div>
+            </section>
+
+            {message && (
+              <p
+                className={`profile-feedback profile-feedback--${messageType}`}
+                role={messageType === "error" ? "alert" : "status"}
+              >
+                {message}
+              </p>
+            )}
           </div>
         </form>
-
-        {message && (
-          <p
-            className={`profile-message profile-message--${messageType}`}
-            role={messageType === "error" ? "alert" : "status"}
-          >
-            {message}
-          </p>
-        )}
-      </section>
+      </div>
     </main>
   );
 }
