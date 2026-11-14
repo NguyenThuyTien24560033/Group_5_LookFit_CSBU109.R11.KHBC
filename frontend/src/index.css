@@ -42,3 +42,12 @@ img {
 a {
   text-decoration: none;
 }
+
+html {
+  scroll-behavior: smooth;
+}
+
+#reviews,
+#feed {
+  scroll-margin-top: 90px;
+}

@@ -26,12 +26,12 @@ import "./App.css";
 export default function App() {
   return (
     <>
-      <Header />
+    
 
       <main className="app-main">
         <Routes>
           {/* Public pages */}
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Header />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/catalog/:id" element={<CatalogItemDetail />} />
@@ -85,7 +85,7 @@ export default function App() {
         </Routes>
       </main>
 
-      <Footer />
+    
     </>
   );
 }

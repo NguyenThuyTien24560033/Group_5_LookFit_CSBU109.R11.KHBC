@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import OutfitArt from '../home/OutfitArt'
-import { ArrowRight, Check, ChevronDown, CircleHelp, Heart, Menu, Plus, Search, SlidersHorizontal, Sparkles, X } from 'lucide-react'
+import { ArrowRight, ArrowUp, Check, ChevronDown, CircleHelp, Heart, Menu, Plus, Search, SlidersHorizontal, Sparkles, X } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import './Header.css'
 import Footer from "./Footer"
@@ -132,7 +132,16 @@ const profile = { name, initials };
 <Footer />
     {isLoggedIn && activeNav === 'Styling studio' && hasStartedStyling && <footer className="action-bar"><div className="container action-inner"><div className="save-status"><span className="saved-dot"><Check size={12} /></span><span>All changes saved <small>(Draft — Look 08)</small></span></div><label className="publish-toggle"><input type="checkbox" checked={published} onChange={e => setPublished(e.target.checked)} /><span className="checkmark"></span> Publish to community feed</label><button className={`finalize-button ${finalized ? 'done' : ''}`} onClick={() => setFinalized(true)}>{finalized ? <><Check size={16} /> Outfit finalized</> : <>Finalize outfit <ArrowRight size={16} /></>}</button></div></footer>}
 
-    <button className={`back-to-top ${showBackToTop ? 'visible' : ''}`} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} aria-label="Back to top" aria-hidden={!showBackToTop} tabIndex={showBackToTop ? 0 : -1}><ArrowRight size={17} /></button>
+
+<button
+  className={`back-to-top ${showBackToTop ? "visible" : ""}`}
+  onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+  aria-label="Back to top"
+  aria-hidden={!showBackToTop}
+  tabIndex={showBackToTop ? 0 : -1}
+>
+  <ArrowUp size={17} />
+</button>
 
     {modalItem && <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label="Swap an item" onClick={() => setModalItem(null)}><div className="swap-modal" onClick={e => e.stopPropagation()}><div className="modal-head"><div><span className="eyebrow">EDIT YOUR LOOK</span><h3>Swap {modalItem.name}</h3></div><button onClick={() => setModalItem(null)} aria-label="Close"><X size={19} /></button></div><div className="modal-grid">{(alternatives[modalItem.id] || alternatives.shirt).map(item => <button className="alternative" key={item.id} onClick={() => replaceItem(item)}><div className={`item-visual tone-${item.tone}`}><span>{item.emoji}</span></div><strong>{item.name}</strong><small>{item.detail}</small>{item.id === modalItem.id && <span className="current"><Check size={12} /> Current</span>}</button>)}</div></div></div>}
   </main>
