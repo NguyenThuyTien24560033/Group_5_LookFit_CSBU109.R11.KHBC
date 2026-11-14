@@ -1,4 +1,6 @@
 
+/* ================= ROOT VARIABLES ================= */
+
 :root {
   --cream: #faf8f5;
   --white: #ffffff;
@@ -9,22 +11,50 @@
   --line: #e7e0da;
   --blush: #e9d5de;
   --serif: Georgia, "Times New Roman", serif;
+
+  /* General content layout */
+  --lookfit-content-width: 1280px;
+  --lookfit-page-gutter: 32px;
+
+  /* Profile / Recommendation / History */
+  --lookfit-user-width: 1320px;
+  --lookfit-user-gutter: 24px;
+
+  /* Back button */
+  --lookfit-back-top: 24px;
+  --lookfit-back-height: 44px;
 }
 
-* {
+/* ================= GLOBAL RESET ================= */
+
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
 html {
+  width: 100%;
   scroll-behavior: smooth;
+
+  /* Keep the same layout width across pages */
+  overflow-y: scroll;
+  scrollbar-gutter: auto;
 }
 
 body {
   margin: 0;
+  min-width: 0;
   overflow-x: hidden;
+
   background: var(--cream);
   color: var(--ink);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+img,
+video {
+  max-width: 100%;
 }
 
 button {
@@ -41,66 +71,103 @@ a {
   text-decoration: none;
 }
 
-.container {
-  width: min(1180px, calc(100% - 64px));
-  margin: 0 auto;
-}
-
-@media (max-width: 768px) {
-  .container {
-    width: calc(100% - 32px);
-  }
-}
-
-
-/* GLOBAL RESPONSIVE */
-
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-html {
-  width: 100%;
-  scroll-behavior: smooth;
-}
-
-body {
-  margin: 0;
-  min-width: 0;
-  overflow-x: hidden;
-}
-
-img,
-video {
-  max-width: 100%;
-}
-
 .app-main {
   width: 100%;
   min-width: 0;
 }
 
-/* TABLET */
+/* ================= GENERAL CONTAINER ================= */
+
+.container {
+  width: min(1180px, calc(100% - 64px));
+  margin: 0 auto;
+}
+
+/* ================= SHARED PAGE CONTAINER ================= */
+
+.lookfit-page-container {
+  width: min(
+    var(--lookfit-user-width),
+    calc(100% - 2 * var(--lookfit-user-gutter))
+  );
+
+  margin-inline: auto;
+}
+
+/* ================= SHARED BACK BUTTON ================= */
+
+.lookfit-page-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  height: var(--lookfit-back-height);
+  min-height: var(--lookfit-back-height);
+  padding: 0 20px;
+  margin: 0;
+
+  border: 1px solid #ead6ca;
+  border-radius: 11px;
+
+  background: #fffdfb;
+  color: #946e5e;
+
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1;
+
+  text-decoration: none;
+  cursor: pointer;
+
+  box-shadow: 0 3px 8px rgba(60, 40, 30, 0.05);
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.lookfit-page-back:hover {
+  border-color: #b4507e;
+  color: #b4507e;
+  background: #fff8fa;
+}
+
+.lookfit-page-back svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+/* ================= TABLET ================= */
+
 @media (max-width: 1024px) {
+  :root {
+    --lookfit-page-gutter: 24px;
+  }
+
   .container {
     width: calc(100% - 48px);
     max-width: 100%;
-    margin-left: auto;
-    margin-right: auto;
+    margin-inline: auto;
   }
 }
 
-/* MOBILE */
+/* ================= MOBILE ================= */
+
 @media (max-width: 768px) {
+  :root {
+    --lookfit-page-gutter: 20px;
+  }
+
   .container {
     width: calc(100% - 32px);
   }
 }
 
-
-/* CONSISTENT RESPONSIVE SPACING */
+/* ================= HOME SECTIONS ================= */
 
 @media (min-width: 769px) and (max-width: 1024px) {
   .testimonials-section .container,
@@ -122,32 +189,10 @@ video {
   }
 }
 
+/* ================= SMALL MOBILE ================= */
 
-/* SHARED PAGE ALIGNMENT */
-
-:root {
-  --lookfit-content-width: 1360px;
-  --lookfit-page-gutter: 40px;
-}
-
-@media (max-width: 1024px) {
+@media (max-width: 600px) {
   :root {
-    --lookfit-page-gutter: 24px;
+    --lookfit-user-gutter: 16px;
   }
-}
-
-@media (max-width: 768px) {
-  :root {
-    --lookfit-page-gutter: 16px;
-  }
-}
-
-/* Reserve scrollbar space on every page */
-html {
-  overflow-y: scroll;
-  scrollbar-gutter: stable;
-}
-
-body {
-  margin: 0;
 }

@@ -369,3 +369,54 @@
     width: 100%;
   }
 }
+
+
+/* Align Recommendation with Profile */
+
+.recommendation-page {
+  padding: 55px 40px 90px;
+  box-sizing: border-box;
+}
+
+.recommendation-container {
+  width: min(1400px, 100%);
+  margin: 0 auto;
+}
+
+/* Back button same as Profile */
+.recommendation-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 13px 19px;
+  border: 1px solid #e8d9d0;
+  border-radius: 11px;
+  background: #fffdfb;
+  color: #81746d;
+  font-size: 16px;
+  text-decoration: none;
+  box-shadow: 0 2px 5px rgba(60, 40, 30, 0.06);
+  cursor: pointer;
+
+  position: static;
+  transform: none;
+  margin-left: 0;
+}
+
+.recommendation-back:hover {
+  color: #b5527a;
+  border-color: #b5527a;
+}
+
+@media (max-width: 1100px) {
+  .recommendation-page {
+    padding: 40px 28px 70px;
+  }
+}
+
+@media (max-width: 520px) {
+  .recommendation-page {
+    padding: 25px 16px 55px;
+  }
+}

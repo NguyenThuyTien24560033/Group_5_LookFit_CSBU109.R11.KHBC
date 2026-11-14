@@ -3,18 +3,21 @@
    LOOKFIT - PROFILE PAGE
 ===================================== */
 
+
 .lookfit-profile-page {
-  min-height: calc(100vh - 90px);
+  min-height: calc(100vh - 94px);
   background: #faf8f6;
-  padding: 55px 40px 90px;
+  padding: 30px 0 90px;
   color: #302923;
   box-sizing: border-box;
 }
 
 .lookfit-profile-container {
-  width: min(1400px, 100%);
+  width: min(1320px, calc(100% - 48px));
   margin: 0 auto;
+  box-sizing: border-box;
 }
+
 
 /* BACK BUTTON */
 
@@ -42,7 +45,7 @@
 /* PAGE HEADING */
 
 .profile-heading {
-  margin: 42px 0 48px;
+  margin: 30px 0 40px;
 }
 
 .profile-eyebrow {
@@ -422,8 +425,12 @@
 
 @media (max-width: 1100px) {
   .lookfit-profile-page {
-    padding: 40px 28px 70px;
-  }
+  padding: 40px 0 70px;
+}
+
+.lookfit-profile-container {
+  width: calc(100% - 40px);
+}
 
   .profile-layout {
     grid-template-columns: minmax(0, 1.4fr) minmax(320px, 1fr);
@@ -478,8 +485,12 @@
 
 @media (max-width: 520px) {
   .lookfit-profile-page {
-    padding: 25px 16px 55px;
-  }
+  padding: 25px 0 55px;
+}
+
+.lookfit-profile-container {
+  width: calc(100% - 32px);
+}
 
   .profile-heading h1 {
     font-size: 40px;
@@ -538,5 +549,25 @@
     flex: 1;
     padding: 0 10px;
     font-size: 12px;
+  }
+}
+
+
+/* PROFILE - SHARED ALIGNMENT */
+
+.lookfit-profile-container {
+  width: min(1320px, calc(100% - 48px));
+  margin-inline: auto;
+}
+
+.profile-back-button.lookfit-page-back {
+  min-height: 44px;
+  padding: 0 20px;
+  font-size: 14px;
+}
+
+@media (max-width: 600px) {
+  .lookfit-profile-container {
+    width: calc(100% - 32px);
   }
 }

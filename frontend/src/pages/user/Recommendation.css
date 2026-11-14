@@ -4,52 +4,73 @@
 .recommendation-page {
   min-height: calc(100vh - 94px);
   background: #faf8f6;
-  padding: 72px 24px 80px;
+  padding: 30px 0 32px;
   box-sizing: border-box;
 }
 
 .recommendation-container {
-  width: 100%;
-  max-width: 1180px;
+  width: min(1320px, calc(100% - 48px));
+  max-width: none;
   margin: 0 auto;
+  box-sizing: border-box;
 }
 
 /* ================= BACK ================= */
 
-.recommendation-back {
+.recommendation-back,
+.recommendation-back.lookfit-page-back {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
 
-  padding: 12px 18px;
-  border: 1px solid #e9d8cf;
-  border-radius: 10px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0 20px;
+  margin: 0;
 
-  background: #fff;
-  color: #806c64;
-  font-size: 15px;
+  position: static;
+  transform: none;
+
+  border: 1px solid #ead6ca;
+  border-radius: 11px;
+  background: #fffdfb;
+  color: #946e5e;
+
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1;
+  text-decoration: none;
+
+  box-shadow: 0 3px 8px rgba(60, 40, 30, 0.05);
   cursor: pointer;
-
-  box-shadow: 0 3px 7px rgba(50, 30, 20, 0.06);
-  transition: all 0.2s ease;
+  transition: 0.2s ease;
 }
 
-.recommendation-back:hover {
-  background: #f6eeeb;
-  transform: translateY(-1px);
+.recommendation-back:hover,
+.recommendation-back.lookfit-page-back:hover {
+  border-color: #b4507e;
+  color: #b4507e;
+  background: #fff8fa;
+  transform: none;
+}
+
+.recommendation-back svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
 }
 
 /* ================= HEADING ================= */
 
 .recommendation-heading {
   text-align: center;
-  margin: 36px auto 50px;
+  margin: 12px auto 32px;
 }
 
 .recommendation-eyebrow {
-  margin: 0 0 18px;
-
+  margin: 0 0 14px;
   color: #c13f77;
   font-size: 12px;
   font-weight: 700;
@@ -65,7 +86,7 @@
   margin: 0;
 
   font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(38px, 4vw, 58px);
+  font-size: clamp(38px, 3.8vw, 58px);
   font-weight: 400;
   line-height: 1.2;
   letter-spacing: -1.8px;
@@ -77,8 +98,9 @@
   font-weight: 400;
 }
 
-.recommendation-description {
-  margin: 20px 0 0;
+.recommendation-description,
+.recommendation-subtitle {
+  margin: 16px 0 0;
   font-size: 16px;
   line-height: 1.7;
   color: #ae8071;
@@ -87,10 +109,11 @@
 /* ================= FORM ================= */
 
 .recommendation-form {
-  max-width: 1060px;
+  width: 100%;
+  max-width: 1120px;
   margin: 0 auto;
 
-  padding: 38px 40px;
+  padding: 40px;
   background: #fffdfc;
 
   border: 1px solid #eadbd3;
@@ -99,16 +122,19 @@
   box-shadow: 0 18px 40px rgba(72, 42, 30, 0.06);
 }
 
+/* ================= FIELDS ================= */
+
 .recommendation-fields {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 26px 24px;
+  column-gap: 26px;
+  row-gap: 26px;
 }
 
 .recommendation-field {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
   min-width: 0;
 }
 
@@ -120,9 +146,9 @@
 
 .recommendation-field select {
   width: 100%;
-  height: 54px;
+  height: 57px;
 
-  padding: 0 18px;
+  padding: 0 20px;
   border: 1px solid #e6d5cb;
   border-radius: 10px;
 
@@ -130,7 +156,7 @@
   color: #332824;
 
   font-family: Georgia, "Times New Roman", serif;
-  font-size: 16px;
+  font-size: 17px;
 
   outline: none;
   cursor: pointer;
@@ -147,77 +173,114 @@
   cursor: not-allowed;
 }
 
-/* ================= BUTTON ================= */
+/* ================= FORM FOOTER ================= */
 
-.recommendation-actions {
+.recommendation-actions,
+.recommendation-form .recommendation-form-footer {
   display: flex;
   justify-content: center;
+  align-items: center;
 
-  margin-top: 36px;
-  padding-top: 34px;
+  width: 100%;
+  margin-top: 40px;
+  padding-top: 35px;
 
-  border-top: 1px solid #f0e6e1;
+  border-top: 1px solid #eee2dc;
 }
 
-.recommendation-actions button {
+/* ================= FIND OUTFITS BUTTON ================= */
+
+.recommendation-actions button,
+.recommendation-form .recommendation-submit {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 12px;
 
-  min-width: 190px;
-  min-height: 60px;
-  padding: 16px 28px;
+  min-width: 200px;
+  height: 65px;
+  min-height: 65px;
+  padding: 0 30px;
+
+  background: #b34e7c;
+  color: #ffffff;
 
   border: none;
   border-radius: 10px;
 
-  background: #b34f7e;
-  color: white;
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: 500;
 
-  font-size: 16px;
-  font-weight: 600;
   cursor: pointer;
 
-  box-shadow: 0 12px 24px rgba(179, 79, 126, 0.17);
+  box-shadow: 0 12px 25px rgba(179, 78, 124, 0.18);
   transition: all 0.2s ease;
 }
 
-.recommendation-actions button:hover:not(:disabled) {
-  background: #9f3d6c;
+.recommendation-actions button:hover:not(:disabled),
+.recommendation-form .recommendation-submit:hover:not(:disabled) {
+  background: #9e3e6b;
   transform: translateY(-2px);
 }
 
-.recommendation-actions button:disabled {
+.recommendation-actions button:disabled,
+.recommendation-form .recommendation-submit:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.recommendation-submit svg {
+  width: 18px;
+  height: 18px;
 }
 
 /* ================= MESSAGE ================= */
 
 .recommendation-message {
-  margin: 20px 0 0;
+  margin: 16px 0 0;
   text-align: center;
   color: #b91c1c;
   font-size: 14px;
 }
 
 .recommendation-note {
-  margin: 30px 0 0;
+  margin: 16px 0 0;
   text-align: center;
   color: #b68d7d;
   font-size: 14px;
 }
 
-/* ================= RESPONSIVE ================= */
+/* ================= TABLET ================= */
+
+@media (max-width: 1100px) {
+  .recommendation-page {
+    padding: 30px 0 32px;
+  }
+
+  .recommendation-container {
+    width: calc(100% - 40px);
+  }
+
+  .recommendation-form {
+    padding: 32px;
+  }
+
+  .recommendation-fields {
+    column-gap: 22px;
+    row-gap: 22px;
+  }
+}
+
+/* ================= MOBILE ================= */
 
 @media (max-width: 768px) {
   .recommendation-page {
-    padding: 32px 16px 60px;
+    padding: 24px 0 40px;
   }
 
   .recommendation-heading {
-    margin: 36px auto;
+    margin: 24px auto 28px;
   }
 
   .recommendation-heading h1 {
@@ -234,132 +297,45 @@
     gap: 20px;
   }
 
-  .recommendation-actions button {
+  .recommendation-field {
+    gap: 10px;
+  }
+
+  .recommendation-field select {
+    height: 54px;
+  }
+
+  .recommendation-actions,
+  .recommendation-form .recommendation-form-footer {
+    margin-top: 28px;
+    padding-top: 24px;
+  }
+
+  .recommendation-actions button,
+  .recommendation-form .recommendation-submit {
     width: 100%;
+    height: 56px;
+    min-height: 56px;
+    font-size: 16px;
   }
 }
 
-
-/* FIND OUTFITS BUTTON */
-
-.recommendation-form .recommendation-form-footer {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  margin-top: 36px;
-  padding-top: 34px;
-  border-top: 1px solid #eee2dc;
+@media (max-width: 600px) {
+  .recommendation-container {
+    width: calc(100% - 32px);
+  }
 }
 
-.recommendation-form .recommendation-submit {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-
-  min-width: 190px;
-  height: 62px;
-  padding: 0 30px;
-
-  background: #b34e7c;
-  color: #ffffff;
-  border: none;
-  border-radius: 10px;
-
-  font-family: inherit;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-
-  box-shadow: 0 12px 25px rgba(179, 78, 124, 0.18);
-  transition: all 0.2s ease;
-}
-
-.recommendation-form .recommendation-submit:hover:not(:disabled) {
-  background: #9e3e6b;
-  transform: translateY(-2px);
-}
-
-.recommendation-form .recommendation-submit:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.recommendation-submit svg {
-  width: 18px;
-  height: 18px;
-}
-
-
-/* COMPACT RECOMMENDATION LAYOUT */
-
-.recommendation-page {
-  padding-top: 24px;
-  padding-bottom: 28px;
-  min-height: calc(100vh - 94px);
-}
-
-.recommendation-heading {
-  margin: 16px auto 26px;
-}
-
-.recommendation-eyebrow {
-  margin-top: 0;
-  margin-bottom: 10px;
-}
-
-.recommendation-heading h1 {
-  font-size: clamp(36px, 3.5vw, 52px);
-  line-height: 1.15;
-}
-
-.recommendation-subtitle {
-  margin-top: 12px;
-  margin-bottom: 0;
-}
-
-.recommendation-form {
-  padding: 26px 36px;
-}
-
-.recommendation-fields {
-  row-gap: 18px;
-}
-
-.recommendation-field {
-  gap: 7px;
-}
-
-.recommendation-field select {
-  height: 48px;
-}
-
-.recommendation-form .recommendation-form-footer {
-  margin-top: 22px;
-  padding-top: 20px;
-}
-
-.recommendation-form .recommendation-submit {
-  height: 50px;
-  min-height: 50px;
-}
-
-.recommendation-note {
-  margin-top: 16px;
-  margin-bottom: 0;
-}
-
-@media (max-width: 700px) {
+@media (max-width: 520px) {
   .recommendation-page {
-    padding: 20px 16px 32px;
+    padding: 25px 0 32px;
+  }
+
+  .recommendation-heading h1 {
+    font-size: 34px;
   }
 
   .recommendation-form {
     padding: 22px 18px;
-  }
-
-  .recommendation-fields {
-    gap: 16px;
   }
 }

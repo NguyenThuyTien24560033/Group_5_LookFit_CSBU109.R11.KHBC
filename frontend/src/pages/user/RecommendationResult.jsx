@@ -1,16 +1,14 @@
 
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { ArrowLeft, Heart } from "lucide-react";
 import { getRecommendations } from "../../services/recommendation.service.js";
 import { createOutfit } from "../../services/outfit.service.js";
 import "./RecommendationResult.css";
 
-// ================= PREVIEW MODE =================
-// true: Xem giao diện bằng dữ liệu mẫu, không cần backend
-// false: Sử dụng dữ liệu thật từ API
+// true = dữ liệu demo, chưa cần backend
+// false = sử dụng API thật
 const PREVIEW_MODE = true;
-
-// ================= MOCK DATA =================
 
 const mockRecommendations = [
   {
@@ -77,13 +75,10 @@ const mockCriteria = {
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
-// ================= IMAGE HELPER =================
-
 function getItemImageUrl(item) {
   if (!item) return "";
 
   if (
-    item.imageUrl &&
     typeof item.imageUrl === "string" &&
     item.imageUrl.trim()
   ) {
@@ -93,38 +88,42 @@ function getItemImageUrl(item) {
   const id =
     typeof item === "string"
       ? item
-      : item.imageId?._id ?? item.imageId?.id ?? item.imageId;
+      : item.imageId?._id ??
+        item.imageId?.id ??
+        item.imageId;
 
   return id ? `${API_BASE_URL}/images/${id}` : "";
 }
 
-// ================= COMPONENT =================
+const STORAGE_KEY = "lookfit_preview_outfits";
+
+function readSavedOutfits() {
+  try {
+    const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    return Array.isArray(data) ? data : [];
+  } catch {
+    return [];
+  }
+}
+
+function outfitSignature(outfit, criteria) {
+  return JSON.stringify({
+    name: outfit?.name || "",
+    items: (outfit?.items || []).map((item) => ({
+      name: item?.name || "",
+      category: item?.category || "",
+      id: item?.id || item?._id || "",
+    })),
+    criteria: criteria || {},
+  });
+}
 
 function RecommendationResult() {
   const { state } = useLocation();
   const navigate = useNavigate();
-const [showBackToTop, setShowBackToTop] = useState(false);
 
-useEffect(() => {
-  const handleScroll = () => {
-    setShowBackToTop(window.scrollY > 250);
-  };
-
-  window.addEventListener("scroll", handleScroll, { passive: true });
-  handleScroll();
-
-  return () => window.removeEventListener("scroll", handleScroll);
-}, []);
-
-const scrollToTop = () => {
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth",
-  });
-};
-  // Dùng mock data khi Preview Mode bật
   const criteria = PREVIEW_MODE
-    ? mockCriteria
+    ? state?.criteria ?? mockCriteria
     : state?.criteria;
 
   const initialRecommendations = PREVIEW_MODE
@@ -147,27 +146,57 @@ const scrollToTop = () => {
         hasNextPage: false,
       };
 
-  const [recommendationGroupId] = useState(() =>
-    crypto.randomUUID()
+  const [recommendationGroupId] = useState(
+    () => crypto.randomUUID()
   );
 
   const [recommendations, setRecommendations] = useState(
     initialRecommendations
   );
 
-  const [pagination, setPagination] = useState(initialPagination);
+  const [pagination, setPagination] = useState(
+    initialPagination
+  );
+
   const [loading, setLoading] = useState(false);
   const [savingIndex, setSavingIndex] = useState(null);
   const [message, setMessage] = useState("");
+  const [savedOutfits, setSavedOutfits] = useState(readSavedOutfits);
 
-  // ================= LOAD RECOMMENDATIONS =================
+  // Back to top
+  const [showBackToTop, setShowBackToTop] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowBackToTop(window.scrollY > 250);
+    };
+
+    window.addEventListener("scroll", handleScroll, {
+      passive: true,
+    });
+
+    handleScroll();
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
+  // ================= PAGINATION =================
 
   const loadRecommendationPage = async (targetPage) => {
-    if (loading || savingIndex !== null || !criteria) return;
-
-    if (PREVIEW_MODE) {
+    if (loading || savingIndex !== null || !criteria) {
       return;
     }
+
+    if (PREVIEW_MODE) return;
 
     setLoading(true);
     setMessage("");
@@ -199,8 +228,6 @@ const scrollToTop = () => {
     }
   };
 
-  // ================= PAGINATION =================
-
   const handleNext = () => {
     if (pagination.hasNextPage) {
       loadRecommendationPage(pagination.page + 1);
@@ -213,53 +240,61 @@ const scrollToTop = () => {
     }
   };
 
-  // ================= SAVE OUTFIT =================
+  // ================= SAVE OUTFIT DIRECTLY TO HISTORY =================
 
-  const handleSave = async (outfit, index) => {
-    if (PREVIEW_MODE) {
-      setMessage(
-        "Preview mode: Saving outfits will be available when the backend is connected."
-      );
-      return;
-    }
-
-    if (savingIndex !== null || loading || !criteria) return;
+  const handleSaveOutfit = async (outfit, index) => {
+    if (!outfit || loading || savingIndex !== null) return;
 
     setSavingIndex(index);
-    setMessage("");
-
     try {
-      const items = (outfit.items ?? []).map((item) => ({
-        id: item.id ?? item._id,
-      }));
-
-      if (
-        items.length === 0 ||
-        items.some((item) => !item.id)
-      ) {
-        setMessage(
-          "This outfit has invalid item data and cannot be saved."
+      if (PREVIEW_MODE) {
+        const existing = readSavedOutfits();
+        const signature = outfitSignature(outfit, criteria);
+        const alreadySaved = existing.some(
+          (item) => item.saveSignature === signature ||
+            outfitSignature(item, item.criteria) === signature
         );
-        return;
+
+        const updated = alreadySaved
+          ? existing.filter(
+              (item) => item.saveSignature !== signature &&
+                outfitSignature(item, item.criteria) !== signature
+            )
+          : [
+              {
+                id: crypto.randomUUID(),
+                recommendationGroupId,
+                saveSignature: signature,
+                name: outfit.name || "My Outfit",
+                imageUrl: outfit.imageUrl ||
+                  (outfit.items ?? []).map(getItemImageUrl).find(Boolean) || "",
+                items: outfit.items ?? [],
+                itemScore: outfit.itemScore,
+                colorScore: outfit.colorScore,
+                totalScore: outfit.totalScore,
+                criteria,
+                status: "DRAFT",
+                visibility: "private",
+                createdAt: new Date().toISOString(),
+              },
+              ...existing,
+            ];
+
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+        setSavedOutfits(updated);
+      } else {
+        const items = (outfit.items ?? []).map((item) => ({
+          id: item.id ?? item._id,
+        }));
+        if (items.length === 0 || items.some((item) => !item.id)) return;
+        await createOutfit(criteria, { items }, recommendationGroupId);
+        setSavedOutfits((previous) => [
+          { ...outfit, criteria, saveSignature: outfitSignature(outfit, criteria) },
+          ...previous,
+        ]);
       }
-
-      await createOutfit(
-        criteria,
-        { items },
-        recommendationGroupId
-      );
-
-      navigate("/outfits/history", {
-        replace: true,
-        state: {
-          message: "Outfit saved successfully.",
-        },
-      });
     } catch (error) {
-      setMessage(
-        error.message ||
-          "Unable to save outfit. Please try again."
-      );
+      console.error("Unable to update saved outfit:", error);
     } finally {
       setSavingIndex(null);
     }
@@ -273,10 +308,11 @@ const scrollToTop = () => {
         <div className="result-container">
           <button
             type="button"
-            className="result-back"
+            className="result-back lookfit-page-back"
             onClick={() => navigate("/recommendation")}
           >
-            ← Back
+            <ArrowLeft size={18} />
+            <span>Back</span>
           </button>
 
           <div className="result-empty">
@@ -311,18 +347,18 @@ const scrollToTop = () => {
   return (
     <main className="result-page">
       <div className="result-container">
-
-        {/* BACK BUTTON */}
+        {/* BACK */}
         <button
           type="button"
-          className="result-back"
+          className="result-back lookfit-page-back"
           onClick={() => navigate("/recommendation")}
           disabled={loading || savingIndex !== null}
         >
-          ← Back
+          <ArrowLeft size={18} />
+            <span>Back</span>
         </button>
 
-        {/* PAGE HEADER */}
+        {/* HEADER */}
         <header className="result-header">
           <p className="result-eyebrow">
             CURATED FOR YOU
@@ -346,21 +382,18 @@ const scrollToTop = () => {
           </div>
         </header>
 
-        {/* MESSAGE */}
-        {message && (
-          <p className="result-message" role="alert">
-            {message}
-          </p>
+        {/* No save notification: the pink heart indicates saved state. */}
+        {message && !PREVIEW_MODE && (
+          <p className="result-message" role="alert">{message}</p>
         )}
 
-        {/* LOADING */}
         {loading && (
           <p className="result-loading">
             Finding your perfect looks...
           </p>
         )}
 
-        {/* EMPTY RESULTS */}
+        {/* EMPTY */}
         {!loading && recommendations.length === 0 && (
           <div className="result-empty">
             <h2>No outfits found</h2>
@@ -379,14 +412,17 @@ const scrollToTop = () => {
           </div>
         )}
 
-        {/* ================= OUTFIT CARDS ================= */}
-
+        {/* OUTFIT CARDS */}
         {!loading && recommendations.length > 0 && (
           <div className="result-grid">
             {recommendations.map((outfit, index) => {
               const items = outfit.items ?? [];
+              const signature = outfitSignature(outfit, criteria);
+              const isSaved = savedOutfits.some(
+                (item) => item.saveSignature === signature ||
+                  outfitSignature(item, item.criteria) === signature
+              );
 
-              // Ưu tiên ảnh mock khi Preview Mode bật
               const coverImage =
                 outfit.imageUrl ||
                 items.map(getItemImageUrl).find(Boolean);
@@ -408,13 +444,15 @@ const scrollToTop = () => {
                   className="result-card"
                   key={`${pagination.page}-${index}`}
                 >
-
                   {/* IMAGE */}
                   <div className="result-card-image">
                     {coverImage ? (
                       <img
                         src={coverImage}
-                        alt={`Recommended outfit ${outfitNumber}`}
+                        alt={
+                          outfit.name ||
+                          `Recommended outfit ${outfitNumber}`
+                        }
                         loading="lazy"
                         decoding="async"
                         onError={(event) => {
@@ -428,31 +466,15 @@ const scrollToTop = () => {
                       </div>
                     )}
 
-                    {/* SCORE */}
                     {displayScore !== null && (
                       <span className="result-score">
                         ✓ {displayScore} pts
                       </span>
                     )}
 
-                    {/* SAVE HEART */}
-                    <button
-                      type="button"
-                      className="result-heart"
-                      title="Save outfit"
-                      aria-label={`Save outfit ${outfitNumber}`}
-                      onClick={() =>
-                        handleSave(outfit, index)
-                      }
-                      disabled={
-                        loading || savingIndex !== null
-                      }
-                    >
-                      {savingIndex === index ? "…" : "♡"}
-                    </button>
                   </div>
 
-                  {/* CARD CONTENT */}
+                  {/* CONTENT */}
                   <div className="result-card-content">
                     <h2>
                       {outfit.name ||
@@ -489,22 +511,31 @@ const scrollToTop = () => {
 
                     {/* FOOTER */}
                     <div className="result-card-footer">
-                      <span>
-                        {items.length} items
-                      </span>
+                      <span>{items.length} items</span>
 
                       <button
                         type="button"
-                        onClick={() =>
-                          handleSave(outfit, index)
-                        }
-                        disabled={
-                          loading || savingIndex !== null
-                        }
+                        className={`result-save-heart${isSaved ? " is-saved" : ""}`}
+                        onClick={() => handleSaveOutfit(outfit, index)}
+                        disabled={loading || savingIndex !== null}
+                        aria-label={isSaved ? `Remove ${outfit.name} from History` : `Save ${outfit.name} to History`}
+                        aria-pressed={isSaved}
+                        title={isSaved ? "Saved — click to remove" : "Save to History"}
+                        style={{
+                          width: 44,
+                          height: 40,
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          borderRadius: 10,
+                          border: "1px solid #e8cbd8",
+                          background: isSaved ? "#fbe6ef" : "#fff9fb",
+                          color: "#b4507e",
+                          cursor: "pointer",
+                          transition: "background .2s ease, transform .2s ease",
+                        }}
                       >
-                        {savingIndex === index
-                          ? "Saving..."
-                          : "Save Look"}
+                        <Heart size={22} fill={isSaved ? "currentColor" : "none"} strokeWidth={2} />
                       </button>
                     </div>
                   </div>
@@ -514,8 +545,7 @@ const scrollToTop = () => {
           </div>
         )}
 
-        {/* ================= PAGINATION ================= */}
-
+        {/* PAGINATION */}
         <div className="result-pagination">
           <button
             type="button"
@@ -546,19 +576,20 @@ const scrollToTop = () => {
             Next →
           </button>
         </div>
-
       </div>
-   {showBackToTop && (
-  <button
-    type="button"
-    className="recommendation-back-to-top"
-    onClick={scrollToTop}
-    aria-label="Back to top"
-    title="Back to top"
-  >
-    ↑
-  </button>
-)}
+
+      {/* BACK TO TOP */}
+      {showBackToTop && (
+        <button
+          type="button"
+          className="recommendation-back-to-top"
+          onClick={scrollToTop}
+          aria-label="Back to top"
+          title="Back to top"
+        >
+          ↑
+        </button>
+      )}
     </main>
   );
 }

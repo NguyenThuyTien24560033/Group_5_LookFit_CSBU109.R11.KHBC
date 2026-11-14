@@ -6,7 +6,6 @@ import { useState } from "react";
 
 export default function Home({ showDashboard = true }) {
 const { user, logout } = useAuth();
-console.log("Current logged-in user:", user);
 const navigate = useNavigate();
 const [showLogout, setShowLogout] = useState(false);
 

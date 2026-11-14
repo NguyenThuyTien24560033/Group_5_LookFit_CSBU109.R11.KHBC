@@ -1,19 +1,21 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import {
-  getOutfitById,
-  updateDraftItems,
-} from "../../services/outfit.service.js";
-
-import { getCatalogProducts } from "../../services/catalog.service.js";
-
 import "./OutfitEdit.css";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
 const CATEGORIES = ["top", "bottom", "shoes", "accessory"];
+const STORAGE_KEY = "lookfit_preview_outfits";
+function readPreview() {
+  try {
+    const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    return Array.isArray(value) ? value : [];
+  } catch {
+    return [];
+  }
+}
 
 function getId(value) {
   return value?._id ?? value?.id ?? value;
@@ -73,103 +75,49 @@ function OutfitEdit() {
     setMessage(error?.message || fallback);
   };
 
+  // Frontend preview: use the same storage as OutfitHistory.jsx.
   useEffect(() => {
-    let cancelled = false;
-
-    async function loadOutfit() {
-      setLoading(true);
-      setMessage("");
-      setIsError(false);
+    setLoading(true);
+    setMessage("");
+    setIsError(false);
+    const saved = readPreview();
+    const found = saved.find((entry) => String(getId(entry)) === String(id));
+    if (!found || String(found.status || "DRAFT").toUpperCase() !== "DRAFT") {
+      setOutfit(null);
       setOutfitLoaded(false);
-
-      try {
-        const result = await getOutfitById(id);
-        const currentOutfit = result?.outfit ?? result?.data ?? result;
-
-        if (cancelled) return;
-
-        if (!currentOutfit || currentOutfit.status !== "DRAFT") {
-          setMessage("Only Draft outfits can be edited.");
-          setIsError(true);
-          return;
-        }
-
-        setOutfit({
-          ...currentOutfit,
-          items: currentOutfit.items ?? [],
-        });
-
-        const firstCategory = CATEGORIES.find((itemCategory) =>
-          currentOutfit.items?.some(
-            (item) => item.category === itemCategory
-          )
-        );
-
-        if (firstCategory) {
-          setCategory(firstCategory);
-        }
-
-        setOutfitLoaded(true);
-      } catch (error) {
-        if (!cancelled) {
-          showError(error, "Unable to load outfit.");
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
+      setMessage("Draft outfit not found or already finalized.");
+      setIsError(true);
+    } else {
+      setOutfit({ ...found, items: found.items ?? [] });
+      setOutfitLoaded(true);
+      const firstCategory = CATEGORIES.find((cat) =>
+        found.items?.some((item) => item.category === cat)
+      );
+      if (firstCategory) setCategory(firstCategory);
     }
-
-    loadOutfit();
-
-    return () => {
-      cancelled = true;
-    };
+    setLoading(false);
   }, [id]);
 
+  // Catalog preview is built from items already stored in History.
+  // This avoids backend/CORS requests in frontend-only mode.
   useEffect(() => {
-    let cancelled = false;
-
-    async function loadCatalog() {
-      setProductsLoading(true);
-      setMessage("");
-      setIsError(false);
-
-      try {
-        const result = await getCatalogProducts({
-          category,
-          page: pagination.page,
-          pageSize: 10,
-        });
-
-        if (cancelled) return;
-
-        setProducts(result.products ?? []);
-
-        setPagination((current) => ({
-          ...current,
-          ...(result.pagination ?? {}),
-          page: result.pagination?.page ?? current.page,
-          pageSize: 10,
-        }));
-      } catch (error) {
-        if (!cancelled) {
-          setProducts([]);
-          showError(error, "Unable to load catalog products.");
-        }
-      } finally {
-        if (!cancelled) {
-          setProductsLoading(false);
-        }
+    const unique = new Map();
+    readPreview().flatMap((entry) => entry.items ?? []).forEach((item) => {
+      const productId = getCatalogId(item);
+      if (productId && item.category === category) {
+        unique.set(String(productId), item);
       }
-    }
-
-    loadCatalog();
-
-    return () => {
-      cancelled = true;
-    };
+    });
+    const all = [...unique.values()];
+    const pageSize = 10;
+    const totalPages = Math.ceil(all.length / pageSize);
+    const page = Math.min(pagination.page, Math.max(totalPages, 1));
+    setProducts(all.slice((page - 1) * pageSize, page * pageSize));
+    setPagination((current) => ({
+      ...current, page, pageSize, totalProducts: all.length,
+      totalPages, hasNextPage: page < totalPages,
+    }));
+    setProductsLoading(false);
   }, [category, pagination.page]);
 
   const handleCategoryChange = (event) => {
@@ -243,21 +191,10 @@ function OutfitEdit() {
   const handleSave = async () => {
     if (!outfit || saving) return;
 
-    const items = (outfit.items ?? []).map((item) => ({
-      id: String(getCatalogId(item) ?? ""),
-    }));
-
-    if (items.length === 0 || items.some((item) => !item.id)) {
+    const items = outfit.items ?? [];
+    if (!items.length) {
       setIsError(true);
-      setMessage("Your outfit must contain valid catalog items.");
-      return;
-    }
-
-    const ids = items.map((item) => item.id);
-
-    if (new Set(ids).size !== ids.length) {
-      setIsError(true);
-      setMessage("An item cannot be selected more than once.");
+      setMessage("Your outfit must contain at least one item.");
       return;
     }
 
@@ -266,13 +203,20 @@ function OutfitEdit() {
     setIsError(false);
 
     try {
-      await updateDraftItems(id, items);
-
+      const saved = readPreview();
+      const index = saved.findIndex((entry) => String(getId(entry)) === String(id));
+      if (index === -1 || String(saved[index].status || "DRAFT").toUpperCase() !== "DRAFT") {
+        throw new Error("Draft no longer exists or has been finalized.");
+      }
+      saved[index] = {
+        ...saved[index],
+        items: outfit.items,
+        updatedAt: new Date().toISOString(),
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
       navigate("/outfits/history", {
         replace: true,
-        state: {
-          message: "Draft updated successfully.",
-        },
+        state: { message: "Draft updated successfully." },
       });
     } catch (error) {
       showError(error, "Unable to save outfit changes.");

@@ -143,14 +143,14 @@ function Recommendation() {
       <div className="recommendation-container">
 
         {/* BACK BUTTON */}
-        <button
-          type="button"
-          className="recommendation-back"
-          onClick={() => navigate("/home")}
-        >
-          <ArrowLeft size={18} />
-          <span>Back</span>
-        </button>
+<button
+  type="button"
+  className="recommendation-back lookfit-page-back"
+  onClick={() => navigate("/home")}
+>
+  <ArrowLeft size={18} />
+  <span>Back</span>
+</button>
 
         {/* PAGE HEADING */}
         <div className="recommendation-heading">

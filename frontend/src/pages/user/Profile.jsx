@@ -224,7 +224,7 @@ export default function Profile() {
   return (
     <main className="lookfit-profile-page">
       <div className="lookfit-profile-container">
-        <Link to="/home" className="profile-back-button">
+        <Link to="/home" className="profile-back-button lookfit-page-back">
           <ArrowLeft size={18} />
           Back
         </Link>
