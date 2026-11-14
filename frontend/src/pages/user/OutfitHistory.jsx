@@ -650,13 +650,16 @@ export default function OutfitHistory() {
   return (
     <main className="outfit-history-page">
       <div className="outfit-history-container">
-        <button
-          type="button"
-          className="history-back"
-          onClick={() => navigate("/recommendation")}
-        >
-          ← Back
-        </button>
+       
+<button
+  type="button"
+  className="history-back"
+  onClick={() => navigate("/home")}
+>
+  <span className="history-back-arrow">←</span>
+  <span>Back</span>
+</button>
+
 
         <header className="outfit-history-header">
           <div>
