@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { ArrowLeft, Mail, LockKeyhole, Check } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import "./Login.css";
 
@@ -35,40 +36,123 @@ export default function Login() {
   };
 
   return (
-    <main className="auth-page">
-      <section className="auth-card">
-        <h1>Login</h1>
+    <main className="lookfit-login-page">
+      <div className="lookfit-login-container">
 
-        <form onSubmit={handleSubmit} className="auth-form">
-          <label htmlFor="email">Email</label>
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            required
-          />
+        <Link to="/" className="login-back">
+          <ArrowLeft size={15} />
+          Back to LookFit
+        </Link>
 
-          <label htmlFor="password">Password</label>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            required
-          />
+        <section className="lookfit-login-card">
 
-          <button type="submit" disabled={loading}>
-            {loading ? "Logging in..." : "Login"}
-          </button>
-        </form>
+          {/* LEFT PANEL */}
+          <div className="login-brand-panel">
+            <Link to="/" className="login-logo">
+              LookFit
+            </Link>
 
-        {message && <p className="auth-message" role="alert">{message}</p>}
+            <span className="login-eyebrow">
+              YOUR PERSONAL STYLING STUDIO
+            </span>
 
-        <p>
-          Don't have an account? <Link to="/register">Register</Link>
-        </p>
-      </section>
+            <h1>
+              Style that feels like
+              <br />
+              <em>you.</em>
+            </h1>
+
+            <p className="login-description">
+              Save your edits, discover new looks, and
+              make every outfit feel intentional.
+            </p>
+
+            <div className="login-benefits">
+              <div>
+                <Check size={15} />
+                <span>Personalised outfit edits</span>
+              </div>
+
+              <div>
+                <Check size={15} />
+                <span>Your looks, saved securely</span>
+              </div>
+            </div>
+          </div>
+
+          {/* RIGHT PANEL */}
+          <div className="login-form-panel">
+            <span className="login-eyebrow">
+              WELCOME BACK
+            </span>
+
+            <h2>Log in to LookFit</h2>
+
+            <form
+              onSubmit={handleSubmit}
+              className="lookfit-login-form"
+            >
+              <div className="login-field">
+                <label htmlFor="email">
+                  <Mail size={15} />
+                  Email
+                </label>
+
+                <input
+                  id="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  autoComplete="email"
+                  value={email}
+                  onChange={(event) =>
+                    setEmail(event.target.value)
+                  }
+                  required
+                />
+              </div>
+
+              <div className="login-field">
+                <label htmlFor="password">
+                  <LockKeyhole size={15} />
+                  Password
+                </label>
+
+                <input
+                  id="password"
+                  type="password"
+                  placeholder="Tối thiểu 8 ký tự"
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(event) =>
+                    setPassword(event.target.value)
+                  }
+                  required
+                />
+              </div>
+
+              {message && (
+                <p className="login-message" role="alert">
+                  {message}
+                </p>
+              )}
+
+              <button
+                type="submit"
+                className="login-submit"
+                disabled={loading}
+              >
+                {loading ? "Logging in..." : "Log in"}
+              </button>
+            </form>
+
+            <p className="login-register">
+              New to LookFit?{" "}
+              <Link to="/register">Sign up</Link>
+            </p>
+          </div>
+        </section>
+      </div>
     </main>
   );
 }
+
