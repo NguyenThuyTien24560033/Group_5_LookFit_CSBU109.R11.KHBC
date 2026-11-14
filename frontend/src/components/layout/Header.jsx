@@ -1,12 +1,13 @@
 
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import OutfitArt from './OutfitArt'
+import OutfitArt from '../home/OutfitArt'
 import { ArrowRight, Check, ChevronDown, CircleHelp, Heart, Menu, Plus, Search, SlidersHorizontal, Sparkles, X } from 'lucide-react'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../../context/AuthContext'
 import './Header.css'
 import Footer from "./Footer"
-import Navigation from "./Navigation";
+import Navigation from "./Navigation"
+import Reviews from "../home/Reviews"
 
 const initialItems = [
   { id: 'shirt', category: 'Essentials', name: 'White Oxford Shirt', detail: 'Cotton · Relaxed fit', emoji: '👕', tone: 'cream' },
