@@ -1,5 +1,4 @@
-
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   UsersRound,
   UserRoundPlus,
@@ -48,6 +47,11 @@ export default function Users() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState(INITIAL_PAGINATION);
+  const [serverStats, setServerStats] = useState({
+    totalUsers: 0,
+    totalAdmins: 0,
+    newThisWeek: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -103,6 +107,10 @@ export default function Users() {
 
         setUsers(records);
 
+        if (result.stats) {
+          setServerStats(result.stats);
+        }
+
         setPagination({
           ...INITIAL_PAGINATION,
           ...(result.pagination ?? {}),
@@ -147,46 +155,22 @@ export default function Users() {
     setPage(1);
   }
 
-  const visibleStats = useMemo(() => {
-    const now = new Date();
-    const weekAgo = new Date(now);
-    weekAgo.setDate(now.getDate() - 7);
-
-    return {
-      admins: users.filter(
-        (user) => user.role?.toUpperCase() === "ADMIN"
-      ).length,
-
-      newThisWeek: users.filter((user) => {
-        if (!user.createdAt) return false;
-
-        const date = new Date(user.createdAt);
-
-        return (
-          !Number.isNaN(date.getTime()) &&
-          date >= weekAgo &&
-          date <= now
-        );
-      }).length,
-    };
-  }, [users]);
-
   const stats = [
     {
       label: "Members",
-      value: pagination.totalUsers,
+      value: serverStats.totalUsers || pagination.totalUsers,
       description: "Registered LookFit accounts",
       icon: UsersRound,
     },
     {
       label: "New this week",
-      value: visibleStats.newThisWeek,
+      value: serverStats.newThisWeek,
       description: "Joined in the last 7 days",
       icon: UserRoundPlus,
     },
     {
       label: "Admins",
-      value: visibleStats.admins,
+      value: serverStats.totalAdmins,
       description: "Accounts with admin access",
       icon: ShieldCheck,
     },

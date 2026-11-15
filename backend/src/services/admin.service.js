@@ -368,7 +368,10 @@ export async function getAdminUsers({
     ];
   }
 
-  const [users, totalUsers] = await Promise.all([
+  const weekAgo = new Date();
+  weekAgo.setDate(weekAgo.getDate() - 7);
+
+  const [users, totalUsers, totalAdmins, newThisWeek] = await Promise.all([
     User.find(filter)
       .select("name email role createdAt")
       .sort({ createdAt: -1 })
@@ -377,6 +380,8 @@ export async function getAdminUsers({
       .lean(),
 
     User.countDocuments(filter),
+    User.countDocuments({ role: "ADMIN" }),
+    User.countDocuments({ createdAt: { $gte: weekAgo } }),
   ]);
 
   return {
@@ -387,6 +392,12 @@ export async function getAdminUsers({
       totalUsers,
       totalPages: Math.ceil(totalUsers / currentPageSize),
       hasNextPage: currentPage * currentPageSize < totalUsers,
+      hasPrevPage: currentPage > 1,
+    },
+    stats: {
+      totalUsers,
+      totalAdmins,
+      newThisWeek,
     },
   };
 }

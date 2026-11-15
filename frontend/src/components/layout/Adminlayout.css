@@ -109,3 +109,23 @@
     bottom: 0;
   }
 }
+
+.lookfit-admin-logout {
+  justify-self: end;
+  padding: 12px 18px;
+  border: 1px solid #ead5ca;
+  border-radius: 10px;
+  color: #302b29;
+  text-decoration: none;
+  background: #fffdfb;
+  font: inherit;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.lookfit-admin-logout:hover {
+  background: #fdf5f8;
+  color: #c44b79;
+  border-color: #d8c2b5;
+}

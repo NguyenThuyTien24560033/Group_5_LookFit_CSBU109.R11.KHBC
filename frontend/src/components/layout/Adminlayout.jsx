@@ -3,16 +3,27 @@ import {
   NavLink,
   Outlet,
   useLocation,
+  useNavigate,
 } from "react-router-dom";
-
+import { useAuth } from "../../context/AuthContext";
 import "./Adminlayout.css";
 
 export default function AdminLayout() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { logout } = useAuth();
 
   const basePath = location.pathname.startsWith("/admin-preview")
     ? "/admin-preview"
     : "/admin";
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } finally {
+      navigate("/", { replace: true });
+    }
+  };
 
   return (
     <div className="lookfit-admin-layout">
@@ -47,10 +58,14 @@ export default function AdminLayout() {
             </NavLink>
           </nav>
 
-          {/* LOGOUT */}
-          <Link to="/" className="lookfit-admin-logout">
+          {/* LOGOUT BUTTON THẬT */}
+          <button
+            type="button"
+            className="lookfit-admin-logout"
+            onClick={handleLogout}
+          >
             Logout
-          </Link>
+          </button>
         </div>
       </header>
 

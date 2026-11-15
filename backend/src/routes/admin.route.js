@@ -116,6 +116,7 @@ router.get(
         message: "Users retrieved successfully",
         data: result.users,
         pagination: result.pagination,
+        stats: result.stats,
       });
     } catch (error) {
       return next(error);
