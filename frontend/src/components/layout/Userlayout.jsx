@@ -1,7 +1,7 @@
 
 import { Link, Outlet } from "react-router-dom";
 import { ArrowLeft, Check } from "lucide-react";
-import "./UserLayout.css";
+import "./Userlayout.css";
 
 const LOGO_URL =
   "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/lookfit-logo-new-SgG0KVJPTSg9JSHg2oL4vzSMpzFO80.png";
