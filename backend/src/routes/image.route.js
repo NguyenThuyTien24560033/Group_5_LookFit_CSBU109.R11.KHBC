@@ -29,7 +29,56 @@ const upload = multer({
   },
 });
 
+/**
+ * @swagger
+ * tags:
+ *   - name: Images
+ *     description: Image upload and retrieval endpoints
+ *
+ * components:
+ *   parameters:
+ *     imageId:
+ *       in: path
+ *       name: id
+ *       required: true
+ *       schema:
+ *         type: string
+ *       description: ID of the image
+ */
 
+/**
+ * @swagger
+ * /api/images/upload:
+ *   post:
+ *     summary: Upload an image (admin only)
+ *     tags: [Images]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - image
+ *             properties:
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *                 description: JPEG, PNG or WebP file, max 5 MB
+ *     responses:
+ *       201:
+ *         description: Image uploaded successfully
+ *       400:
+ *         description: Invalid file type or file too large
+ *       401:
+ *         description: Missing or invalid token
+ *       403:
+ *         description: Not an admin
+ */
+// POST /api/images/upload
+// Form-data: image = image file
 router.post(
   "/upload",
   authenticate,
@@ -59,7 +108,46 @@ router.post(
   }
 );
 
-
+/**
+ * @swagger
+ * /api/images/{id}:
+ *   get:
+ *     summary: Get an image by ID (public)
+ *     tags: [Images]
+ *     parameters:
+ *       - $ref: '#/components/parameters/imageId'
+ *     responses:
+ *       200:
+ *         description: The image file
+ *         content:
+ *           image/*:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *       400:
+ *         description: Malformed ID
+ *       404:
+ *         description: Image not found
+ *   delete:
+ *     summary: Delete an image by ID (admin only)
+ *     tags: [Images]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/imageId'
+ *     responses:
+ *       200:
+ *         description: Image deleted successfully
+ *       400:
+ *         description: Malformed ID
+ *       401:
+ *         description: Missing or invalid token
+ *       403:
+ *         description: Not an admin
+ *       404:
+ *         description: Image not found
+ */
+// GET /api/images/:id
 router.get("/:id", async (req, res, next) => {
   try {
     await streamImage(req.params.id, res);

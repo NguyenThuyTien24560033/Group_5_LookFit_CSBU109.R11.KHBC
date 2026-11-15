@@ -1,5 +1,7 @@
 import express from "express";
 import cors from "cors";
+import swaggerJsdoc from "swagger-jsdoc";
+import swaggerUi from "swagger-ui-express";
 
 import errorHandler from "./middleware/errorHandler.js";
 
@@ -15,6 +17,31 @@ const app = express();
 
 app.use(cors());
 app.use(express.json({ limit: "1mb" }));
+
+// Swagger configuration
+const swaggerOptions = {
+  definition: {
+    openapi: "3.0.0",
+    info: {
+      title: "LFit API",
+      version: "1.0.0",
+      description:
+        "API documentation for the LFit outfit recommendation application.",
+    },
+    servers: [
+      {
+        url: "http://localhost:3000",
+        description: "Local development server",
+      },
+    ],
+  },
+  apis: ["./src/routes/*.js"],
+};
+
+const swaggerSpec = swaggerJsdoc(swaggerOptions);
+
+// Swagger UI
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Health check
 app.get("/", (req, res) => {

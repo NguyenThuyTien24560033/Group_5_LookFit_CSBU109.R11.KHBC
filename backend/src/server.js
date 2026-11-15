@@ -1,4 +1,3 @@
-
 import "dotenv/config";
 import app from "./app.js";
 import connectDB from "./config/db.js";
@@ -11,6 +10,7 @@ const startServer = async () => {
 
     app.listen(PORT, () => {
       console.log(`LFit server is running on port ${PORT}`);
+      console.log(`Swagger docs available at http://localhost:${PORT}/api-docs/`);
     });
   } catch (error) {
     console.error("Failed to start server:", error.message);
