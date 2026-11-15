@@ -23,6 +23,7 @@ function getItemImageUrl(item) {
 export default function Lookbook() {
   const navigate = useNavigate();
   const [outfits, setOutfits] = useState([]);
+  const [selectedOutfit, setSelectedOutfit] = useState(null);
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({
     page: 1,
@@ -148,7 +149,13 @@ export default function Lookbook() {
               const firstImage = items.map(getItemImageUrl).find(Boolean) || "";
 
               return (
-                <article className="look-card" key={outfit._id || index}>
+                <article
+                  className="look-card"
+                  key={outfit._id || index}
+                  onClick={() => setSelectedOutfit(outfit)}
+                  style={{ cursor: "pointer" }}
+                  title="Click to view outfit breakdown"
+                >
                   <div
                     className="look-image"
                     style={{
@@ -176,14 +183,17 @@ export default function Lookbook() {
 
                     <p style={{ margin: 0 }}>Curated by {author}</p>
 
-                    {/* Món đồ trong Outfit - bấm vào xem chi tiết sản phẩm */}
+                    {/* Món đồ trong Outfit */}
                     {items.length > 0 && (
                       <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
                         {items.map((item, itemIdx) => (
                           <button
                             key={item._id || itemIdx}
                             type="button"
-                            onClick={() => handleItemClick(item)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleItemClick(item);
+                            }}
                             title={`View details of ${item.name}`}
                             style={{
                               fontSize: 11,
@@ -262,6 +272,180 @@ export default function Lookbook() {
             </div>
           )}
         </>
+      )}
+
+      {/* ================= MODAL XEM CHI TIẾT TỪNG ITEM TRONG OUTFIT ================= */}
+      {selectedOutfit && (
+        <div
+          className="lookfit-modal-overlay"
+          onClick={() => setSelectedOutfit(null)}
+        >
+          <div
+            className="lookfit-save-modal"
+            style={{ width: "min(560px, 100%)" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="lookfit-modal-close"
+              onClick={() => setSelectedOutfit(null)}
+              aria-label="Close"
+            >
+              ×
+            </button>
+
+            <p className="lookfit-modal-eyebrow">OUTFIT BREAKDOWN</p>
+            <h2>
+              {selectedOutfit.name || (selectedOutfit.case ? `${selectedOutfit.case.charAt(0).toUpperCase() + selectedOutfit.case.slice(1)} Look` : "Curated Look")} <em>Pieces</em>
+            </h2>
+
+            <p className="lookfit-modal-description" style={{ marginBottom: 18 }}>
+              {selectedOutfit.bodyShape && (
+                <span>Body shape: <strong style={{ textTransform: "uppercase" }}>{selectedOutfit.bodyShape}</strong> · </span>
+              )}
+              {selectedOutfit.case && (
+                <span>Occasion: <strong style={{ textTransform: "capitalize" }}>{selectedOutfit.case}</strong> · </span>
+              )}
+              {selectedOutfit.style && (
+                <span>Style: <strong style={{ textTransform: "capitalize" }}>{selectedOutfit.style}</strong></span>
+              )}
+            </p>
+
+            {/* DANH SÁCH CHI TIẾT CÁC MÓN ĐỒ */}
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 12,
+                maxHeight: "360px",
+                overflowY: "auto",
+                marginBottom: 20,
+              }}
+            >
+              {(selectedOutfit.items || []).map((item, idx) => {
+                const imgUrl = getItemImageUrl(item);
+                const catalogId =
+                  item.catalogId?._id ??
+                  item.catalogId?.id ??
+                  item.catalogId ??
+                  item._id ??
+                  item.id;
+
+                return (
+                  <div
+                    key={item._id || idx}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 14,
+                      padding: "10px 14px",
+                      borderRadius: 12,
+                      border: "1px solid #ebd8d4",
+                      background: "#fff",
+                    }}
+                  >
+                    {imgUrl ? (
+                      <img
+                        src={imgUrl}
+                        alt={item.name}
+                        style={{
+                          width: 58,
+                          height: 58,
+                          objectFit: "cover",
+                          borderRadius: 8,
+                          border: "1px solid #eee",
+                        }}
+                      />
+                    ) : (
+                      <div
+                        style={{
+                          width: 58,
+                          height: 58,
+                          borderRadius: 8,
+                          background: "#fbf2f4",
+                          display: "grid",
+                          placeItems: "center",
+                          color: "#b5527a",
+                          fontSize: 11,
+                          fontWeight: 700,
+                        }}
+                      >
+                        {item.category?.toUpperCase() || "ITEM"}
+                      </div>
+                    )}
+
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <span
+                        style={{
+                          fontSize: 11,
+                          color: "#b5527a",
+                          fontWeight: 700,
+                          textTransform: "uppercase",
+                          letterSpacing: "0.5px",
+                        }}
+                      >
+                        {item.category}{" "}
+                        {item.color ? `· ${item.color}` : ""}
+                      </span>
+                      <h4
+                        style={{
+                          margin: "3px 0 0",
+                          fontSize: 15,
+                          color: "#2b2623",
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                      >
+                        {item.name || "Unnamed Item"}
+                      </h4>
+                    </div>
+
+                    {catalogId && (
+                      <button
+                        type="button"
+                        onClick={() => handleItemClick(item)}
+                        style={{
+                          padding: "6px 12px",
+                          borderRadius: 6,
+                          border: "1px solid #b5527a",
+                          background: "#fff9fb",
+                          color: "#b5527a",
+                          fontSize: 12,
+                          fontWeight: 600,
+                          cursor: "pointer",
+                          whiteSpace: "nowrap",
+                          transition: "background 0.2s ease",
+                        }}
+                      >
+                        View detail →
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}>
+              <button
+                type="button"
+                className="lookfit-modal-cancel"
+                onClick={() => setSelectedOutfit(null)}
+                style={{
+                  padding: "8px 20px",
+                  borderRadius: 8,
+                  border: "1px solid #ead5cf",
+                  background: "#fff",
+                  color: "#302a28",
+                  fontSize: 13,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </section>
   );
