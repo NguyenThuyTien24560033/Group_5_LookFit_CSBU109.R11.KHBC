@@ -1,4 +1,3 @@
-
 import { useEffect, useMemo, useState } from "react";
 import {
   getAdminProducts,
@@ -15,6 +14,23 @@ const ALLOWED_IMAGE_TYPES = [
   "image/jpeg",
   "image/png",
   "image/webp",
+];
+
+// Danh sách 13 màu chuẩn theo thuật toán phối màu của LookFit
+const COLORS = [
+  { value: "black", label: "Black" },
+  { value: "white", label: "White" },
+  { value: "gray", label: "Gray" },
+  { value: "beige", label: "Beige" },
+  { value: "brown", label: "Brown" },
+  { value: "navy", label: "Navy" },
+  { value: "blue", label: "Blue" },
+  { value: "red", label: "Red" },
+  { value: "pink", label: "Pink" },
+  { value: "orange", label: "Orange" },
+  { value: "yellow", label: "Yellow" },
+  { value: "green", label: "Green" },
+  { value: "purple", label: "Purple" },
 ];
 
 const EMPTY_PRODUCT = {
@@ -36,18 +52,41 @@ const ARRAY_FIELDS = [
   {
     key: "cases",
     label: "Occasions",
-    options: ["casual", "formal", "party", "work", "sport", "school"],
+    options: [
+      "casual",
+      "daily",
+      "school",
+      "work",
+      "business",
+      "party",
+      "date",
+      "wedding",
+      "travel",
+      "sport",
+      "formal",
+    ],
   },
   {
     key: "styles",
     label: "Styles",
     options: [
       "basic",
+      "minimal",
       "minimalist",
+      "smart-casual",
+      "street",
       "streetwear",
-      "elegant",
-      "sporty",
       "vintage",
+      "preppy",
+      "sporty",
+      "chic",
+      "classic",
+      "elegant",
+      "bohemian",
+      "old-money",
+      "y2k",
+      "coquette",
+      "grunge",
     ],
   },
   {
@@ -58,7 +97,16 @@ const ARRAY_FIELDS = [
   {
     key: "weathers",
     label: "Weather",
-    options: ["warm", "hot", "cool", "cold", "rainy"],
+    options: [
+      "hot",
+      "warm",
+      "mild",
+      "cool",
+      "cold",
+      "rainy",
+      "windy",
+      "humid",
+    ],
   },
   {
     key: "shapes",
@@ -74,7 +122,17 @@ const ARRAY_FIELDS = [
   {
     key: "lifestyles",
     label: "Lifestyles",
-    options: ["student", "office", "active", "relaxed"],
+    options: [
+      "student",
+      "daily",
+      "office",
+      "active",
+      "relaxed",
+      "travel",
+      "outdoor",
+      "social",
+      "work-from-home",
+    ],
   },
 ];
 
@@ -251,7 +309,7 @@ export default function Catalog() {
     setForm({
       category: product.category ?? "top",
       name: product.name ?? "",
-      color: product.color ?? "",
+      color: (product.color ?? "").trim().toLowerCase(),
       imageId,
       imageUrl: product.imageUrl ?? "",
       cases: [...(product.cases ?? [])],
@@ -355,7 +413,7 @@ export default function Catalog() {
     let payload = {
       ...form,
       name: form.name.trim(),
-      color: form.color.trim(),
+      color: form.color.trim().toLowerCase(),
       imageId: form.imageId || null,
       imageUrl: form.imageUrl.trim() || null,
     };
@@ -526,18 +584,33 @@ export default function Catalog() {
               </select>
             </div>
 
+            {/* SELECTION CHO MÀU SẮC */}
             <div className="catalog-field">
               <label htmlFor="product-color">Color *</label>
-              <input
+              <select
                 id="product-color"
                 value={form.color}
                 onChange={(event) =>
                   updateField("color", event.target.value)
                 }
-                placeholder="e.g. white"
-                maxLength={50}
                 required
-              />
+              >
+                <option value="" disabled>
+                  Select a color
+                </option>
+                {COLORS.map((color) => (
+                  <option key={color.value} value={color.value}>
+                    {color.label}
+                  </option>
+                ))}
+                {/* Giữ lại màu cũ nếu trước đây từng lưu màu tùy biến chưa nằm trong danh sách chuẩn */}
+                {form.color &&
+                  !COLORS.some((c) => c.value === form.color.toLowerCase()) && (
+                    <option value={form.color.toLowerCase()}>
+                      {form.color}
+                    </option>
+                  )}
+              </select>
             </div>
 
             <div className="catalog-field">

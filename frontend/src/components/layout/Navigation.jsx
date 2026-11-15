@@ -5,7 +5,6 @@ import "./Navigation.css";
 
 const links = [
   ["Home", "/"],
-  ["Reviews", "/#reviews"],
   ["Discover feed", "/#feed"],
 ];
 
