@@ -1,4 +1,3 @@
-
 import {
   Link,
   NavLink,
@@ -35,8 +34,12 @@ export default function AdminLayout() {
               Dashboard
             </NavLink>
 
-            <NavLink to={`${basePath}/predefined-outfits`}>
+            <NavLink to={`${basePath}/catalog`}>
               Catalog
+            </NavLink>
+
+            <NavLink to={`${basePath}/predefined-outfits`}>
+              Predefined Looks
             </NavLink>
 
             <NavLink to={`${basePath}/users`}>

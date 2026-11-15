@@ -18,6 +18,7 @@ import OutfitEdit from "./pages/user/OutfitEdit.jsx";
 import Dashboard from "./pages/admin/Dashboard.jsx";
 import PredefinedOutfits from "./pages/admin/PredefinedOutfits.jsx";
 import Users from "./pages/admin/Users.jsx";
+import Catalog from "./pages/admin/Catalog.jsx";
 
 import ProtectedRoute from "./routes/ProtectedRoute.jsx";
 import AdminRoute from "./routes/AdminRoute.jsx";
@@ -57,7 +58,7 @@ export default function App() {
           <Route path="/register" element={<Register />} />
         </Route>
 
-        {/* PUBLIC CATALOG */}
+        {/* PUBLIC CATALOG DETAIL */}
         <Route
           path="/catalog/:id"
           element={<CatalogItemDetail />}
@@ -85,7 +86,6 @@ export default function App() {
               element={<OutfitHistory />}
             />
 
-            {/* ROUTE CHỈNH SỬA OUTFIT */}
             <Route
               path="/outfits/:id/edit"
               element={<OutfitEdit />}
@@ -100,16 +100,9 @@ export default function App() {
             element={<AdminLayout />}
           >
             <Route index element={<Dashboard />} />
-
-            <Route
-              path="predefined-outfits"
-              element={<PredefinedOutfits />}
-            />
-
-            <Route
-              path="users"
-              element={<Users />}
-            />
+            <Route path="catalog" element={<Catalog />} />
+            <Route path="predefined-outfits" element={<PredefinedOutfits />} />
+            <Route path="users" element={<Users />} />
           </Route>
         )}
 
@@ -120,16 +113,9 @@ export default function App() {
             element={<AdminLayout />}
           >
             <Route index element={<Dashboard />} />
-
-            <Route
-              path="predefined-outfits"
-              element={<PredefinedOutfits />}
-            />
-
-            <Route
-              path="users"
-              element={<Users />}
-            />
+            <Route path="catalog" element={<Catalog />} />
+            <Route path="predefined-outfits" element={<PredefinedOutfits />} />
+            <Route path="users" element={<Users />} />
           </Route>
         </Route>
 
