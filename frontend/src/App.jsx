@@ -1,4 +1,3 @@
-
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import Header from "./components/layout/Header.jsx";
@@ -14,6 +13,7 @@ import CatalogItemDetail from "./pages/user/CatalogItemDetail.jsx";
 import Recommendation from "./pages/user/Recommendation.jsx";
 import RecommendationResult from "./pages/user/RecommendationResult.jsx";
 import OutfitHistory from "./pages/user/OutfitHistory.jsx";
+import OutfitEdit from "./pages/user/OutfitEdit.jsx";
 
 import Dashboard from "./pages/admin/Dashboard.jsx";
 import PredefinedOutfits from "./pages/admin/PredefinedOutfits.jsx";
@@ -83,6 +83,12 @@ export default function App() {
             <Route
               path="/outfits/history"
               element={<OutfitHistory />}
+            />
+
+            {/* ROUTE CHỈNH SỬA OUTFIT */}
+            <Route
+              path="/outfits/:id/edit"
+              element={<OutfitEdit />}
             />
           </Route>
         </Route>
