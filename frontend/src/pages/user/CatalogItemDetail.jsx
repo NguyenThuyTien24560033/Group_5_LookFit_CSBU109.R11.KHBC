@@ -9,7 +9,9 @@ import "./CatalogItemDetail.css";
 const PAGE_SIZE = 10;
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+  import.meta.env.VITE_API_URL || "https://group-5-lookfit-csbu109-r11-khbc.onrender.com";
+// const API_BASE_URL =
+//   import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
 function getImageUrl(imageId) {
   if (!imageId) return null;

@@ -163,9 +163,13 @@ function getProductImageUrl(product) {
   const imageId = getImageId(product);
 
   if (imageId) {
+    
     const baseURL = (
-      api.defaults.baseURL || "http://localhost:3000/api"
+      api.defaults.baseURL || "https://group-5-lookfit-csbu109-r11-khbc.onrender.com"
     ).replace(/\/+$/, "");
+    // const baseURL = (
+    //   api.defaults.baseURL || "http://localhost:3000/api"
+    // ).replace(/\/+$/, "");
 
     return `${baseURL}/images/${imageId}`;
   }

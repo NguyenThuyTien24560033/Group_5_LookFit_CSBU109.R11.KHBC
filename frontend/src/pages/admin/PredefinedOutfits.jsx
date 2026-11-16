@@ -2,8 +2,10 @@ import { useState } from "react";
 import api from "../../services/api.js";
 import "./PredefinedOutfits.css";
 
+// const API_BASE_URL =
+//   import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+  import.meta.env.VITE_API_URL || "https://group-5-lookfit-csbu109-r11-khbc.onrender.com";
 
 function getItemImageUrl(item) {
   if (!item) return "";
