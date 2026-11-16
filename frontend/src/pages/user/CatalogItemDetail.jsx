@@ -6,7 +6,7 @@ import { getPublicOutfitsFeaturingItem } from "../../services/outfit.service.js"
 
 import "./CatalogItemDetail.css";
 
-const PAGE_SIZE = 9;
+const PAGE_SIZE = 10;
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || "https://group-5-lookfit-csbu109-r11-khbc.onrender.com/api";

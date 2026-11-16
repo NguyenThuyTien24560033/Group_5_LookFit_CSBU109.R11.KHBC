@@ -58,7 +58,7 @@ function OutfitEdit() {
 
   const [pagination, setPagination] = useState({
     page: 1,
-    pageSize: 10,
+    pageSize: 12,
     totalProducts: 0,
     totalPages: 0,
     hasNextPage: false,
@@ -145,7 +145,7 @@ function OutfitEdit() {
         const result = await getCatalogProducts({
           category,
           page: pagination.page,
-          pageSize: 10,
+          pageSize: 12,
         });
 
         if (cancelled) return;
@@ -156,7 +156,7 @@ function OutfitEdit() {
           ...current,
           ...(result.pagination ?? {}),
           page: result.pagination?.page ?? current.page,
-          pageSize: 10,
+          pageSize: 12,
         }));
       } catch (error) {
         if (!cancelled) {

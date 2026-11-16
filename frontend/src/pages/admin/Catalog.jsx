@@ -8,7 +8,7 @@ import {
 import api from "../../services/api.js";
 import "./Catalog.css";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 9;
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = [
   "image/jpeg",
