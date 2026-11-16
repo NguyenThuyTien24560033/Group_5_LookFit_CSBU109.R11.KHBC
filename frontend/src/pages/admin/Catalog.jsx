@@ -165,7 +165,7 @@ function getProductImageUrl(product) {
   if (imageId) {
     
     const baseURL = (
-      api.defaults.baseURL || "https://group-5-lookfit-csbu109-r11-khbc.onrender.com"
+      api.defaults.baseURL || "https://group-5-lookfit-csbu109-r11-khbc.onrender.com/api"
     ).replace(/\/+$/, "");
     // const baseURL = (
     //   api.defaults.baseURL || "http://localhost:3000/api"

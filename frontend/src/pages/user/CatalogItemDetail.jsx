@@ -9,7 +9,7 @@ import "./CatalogItemDetail.css";
 const PAGE_SIZE = 10;
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "https://group-5-lookfit-csbu109-r11-khbc.onrender.com";
+  import.meta.env.VITE_API_URL || "https://group-5-lookfit-csbu109-r11-khbc.onrender.com/api";
 // const API_BASE_URL =
 //   import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
