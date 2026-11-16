@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, ArrowRight, Sparkles } from "lucide-react";
-import { getPublicOutfits } from "../../services/outfit.service.js";
+import { getPublicOutfits, createOutfit } from "../../services/outfit.service.js";
 import "./Lookbook.css";
 
 const API_BASE_URL =
@@ -34,6 +34,8 @@ export default function Lookbook() {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -96,6 +98,57 @@ export default function Lookbook() {
     }
   }
 
+  function handleOpenOutfit(outfit) {
+    setSaveMessage("");
+    setSelectedOutfit(outfit);
+  }
+
+  async function handleSaveOutfit() {
+    if (!selectedOutfit) return;
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    setSaving(true);
+    setSaveMessage("");
+
+    try {
+      const criteria = {
+        case: selectedOutfit.case || "casual",
+        style: selectedOutfit.style || "casual",
+        season: selectedOutfit.season || "all-season",
+        weather: selectedOutfit.weather || "mild",
+        lifestyle: selectedOutfit.lifestyle || "everyday",
+      };
+
+      const items = (selectedOutfit.items || [])
+        .map((item) => ({
+          id:
+            item.catalogId?._id ??
+            item.catalogId?.id ??
+            item.catalogId ??
+            item._id ??
+            item.id,
+        }))
+        .filter((item) => Boolean(item.id));
+
+      if (items.length === 0) {
+        setSaveMessage("No valid items in this outfit to save.");
+        return;
+      }
+
+      await createOutfit(criteria, { items });
+      setSaveMessage("Outfit saved to your History as Draft!");
+    } catch (err) {
+      setSaveMessage(err?.message || "Failed to save outfit.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   return (
     <section id="feed" className="feed-section container">
       <div className="section-heading feed-heading">
@@ -152,7 +205,7 @@ export default function Lookbook() {
                 <article
                   className="look-card"
                   key={outfit._id || index}
-                  onClick={() => setSelectedOutfit(outfit)}
+                  onClick={() => handleOpenOutfit(outfit)}
                   style={{ cursor: "pointer" }}
                   title="Click to view outfit breakdown"
                 >
@@ -422,7 +475,39 @@ export default function Lookbook() {
               })}
             </div>
 
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}>
+            <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 10 }}>
+              {saveMessage && (
+                <span
+                  style={{
+                    fontSize: 12,
+                    color: saveMessage.includes("saved") ? "#357a53" : "#b5527a",
+                    fontWeight: 600,
+                    marginRight: "auto",
+                  }}
+                >
+                  {saveMessage}
+                </span>
+              )}
+
+              <button
+                type="button"
+                onClick={handleSaveOutfit}
+                disabled={saving || saveMessage.includes("saved")}
+                style={{
+                  padding: "8px 18px",
+                  borderRadius: 8,
+                  border: "1px solid #b5527a",
+                  background: saveMessage.includes("saved") ? "#edf8f1" : "#b5527a",
+                  color: saveMessage.includes("saved") ? "#357a53" : "#fff",
+                  fontSize: 13,
+                  fontWeight: 600,
+                  cursor: saving || saveMessage.includes("saved") ? "default" : "pointer",
+                  transition: "all 0.2s ease",
+                }}
+              >
+                {saving ? "Saving..." : saveMessage.includes("saved") ? "Saved to History ✓" : "Save to History"}
+              </button>
+
               <button
                 type="button"
                 className="lookfit-modal-cancel"
