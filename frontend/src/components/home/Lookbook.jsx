@@ -4,15 +4,13 @@ import { ArrowLeft, ArrowRight, Sparkles } from "lucide-react";
 import { getPublicOutfits } from "../../services/outfit.service.js";
 import "./Lookbook.css";
 
-// const API_BASE_URL =
-//   import.meta.env.VITE_API_URL || "http://localhost:3000/api";
-  const API_BASE_URL =
+const API_BASE_URL =
   import.meta.env.VITE_API_URL || "https://group-5-lookfit-csbu109-r11-khbc.onrender.com/api";
 
 function getItemImageUrl(item) {
   if (!item) return "";
   if (typeof item.imageUrl === "string" && item.imageUrl.trim()) {
-    return item.imageUrl.trim();
+    return item.imageUrl.trim().replace(/^http:\/\//i, "https://");
   }
   const id =
     typeof item === "string"
@@ -185,7 +183,6 @@ export default function Lookbook() {
 
                     <p style={{ margin: 0 }}>Curated by {author}</p>
 
-                    {/* Món đồ trong Outfit */}
                     {items.length > 0 && (
                       <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
                         {items.map((item, itemIdx) => (
@@ -219,7 +216,6 @@ export default function Lookbook() {
             })}
           </div>
 
-          {/* Phân trang */}
           {pagination.totalPages > 1 && (
             <div
               style={{
@@ -276,7 +272,6 @@ export default function Lookbook() {
         </>
       )}
 
-      {/* ================= MODAL XEM CHI TIẾT TỪNG ITEM TRONG OUTFIT ================= */}
       {selectedOutfit && (
         <div
           className="lookfit-modal-overlay"
@@ -312,7 +307,6 @@ export default function Lookbook() {
               )}
             </p>
 
-            {/* DANH SÁCH CHI TIẾT CÁC MÓN ĐỒ */}
             <div
               style={{
                 display: "flex",
@@ -349,6 +343,7 @@ export default function Lookbook() {
                       <img
                         src={imgUrl}
                         alt={item.name}
+                        referrerPolicy="no-referrer"
                         style={{
                           width: 58,
                           height: 58,

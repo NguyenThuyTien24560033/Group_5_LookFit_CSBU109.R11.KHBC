@@ -10,16 +10,22 @@ const PAGE_SIZE = 10;
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || "https://group-5-lookfit-csbu109-r11-khbc.onrender.com/api";
-// const API_BASE_URL =
-//   import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
-function getImageUrl(imageId) {
-  if (!imageId) return null;
+function getImageUrl(itemOrImageId) {
+  if (!itemOrImageId) return null;
+
+  if (typeof itemOrImageId === "object" && typeof itemOrImageId.imageUrl === "string" && itemOrImageId.imageUrl.trim()) {
+    return itemOrImageId.imageUrl.trim().replace(/^http:\/\//i, "https://");
+  }
+
+  if (typeof itemOrImageId === "string" && /^https?:\/\//i.test(itemOrImageId.trim())) {
+    return itemOrImageId.trim().replace(/^http:\/\//i, "https://");
+  }
 
   const id =
-    typeof imageId === "object"
-      ? imageId._id ?? imageId.id
-      : imageId;
+    typeof itemOrImageId === "object"
+      ? itemOrImageId.imageId?._id ?? itemOrImageId.imageId?.id ?? itemOrImageId.imageId ?? itemOrImageId._id ?? itemOrImageId.id
+      : itemOrImageId;
 
   return id ? `${API_BASE_URL}/images/${id}` : null;
 }
@@ -247,7 +253,7 @@ export default function CatalogItemDetail() {
     );
   }
 
-  const productImageUrl = getImageUrl(product.imageId);
+  const productImageUrl = getImageUrl(product);
 
   return (
     <main className="catalog-detail-page">
@@ -261,6 +267,7 @@ export default function CatalogItemDetail() {
             <img
               src={productImageUrl}
               alt={product.name || "Product"}
+              referrerPolicy="no-referrer"
               onError={(event) => {
                 event.currentTarget.style.display = "none";
               }}
@@ -393,7 +400,7 @@ export default function CatalogItemDetail() {
                     {Array.isArray(outfit.items) &&
                     outfit.items.length > 0 ? (
                       outfit.items.map((item, itemIndex) => {
-                        const imageUrl = getImageUrl(item.imageId);
+                        const imageUrl = getImageUrl(item);
                         const itemCatalogId = getProductId(item);
                         const isCurrentProduct =
                           itemCatalogId === id ||
@@ -406,6 +413,7 @@ export default function CatalogItemDetail() {
                                 src={imageUrl}
                                 alt={item.name || "Outfit item"}
                                 loading="lazy"
+                                referrerPolicy="no-referrer"
                                 onError={(event) => {
                                   event.currentTarget.style.display = "none";
                                 }}
