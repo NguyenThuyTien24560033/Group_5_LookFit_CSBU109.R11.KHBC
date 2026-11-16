@@ -4,8 +4,10 @@ import { ArrowLeft, ArrowRight, Sparkles } from "lucide-react";
 import { getPublicOutfits } from "../../services/outfit.service.js";
 import "./Lookbook.css";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+// const API_BASE_URL =
+//   import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+  const API_BASE_URL =
+  import.meta.env.VITE_API_URL || "https://group-5-lookfit-csbu109-r11-khbc.onrender.com";
 
 function getItemImageUrl(item) {
   if (!item) return "";
