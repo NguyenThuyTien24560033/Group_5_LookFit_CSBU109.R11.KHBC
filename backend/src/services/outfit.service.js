@@ -4,6 +4,24 @@ import OutfitItem from "../models/OutfitItem.js";
 import CatalogItem from "../models/CatalogItem.js";
 import HttpError from "../utils/httpError.js";
 
+function mergeItemWithCatalog(item) {
+  if (!item) return item;
+
+  const catalog =
+    item.catalogId && typeof item.catalogId === "object"
+      ? item.catalogId
+      : null;
+
+  if (!catalog) return item;
+
+  return {
+    ...item,
+    imageId: catalog.imageId || item.imageId || null,
+    imageUrl: catalog.imageUrl || item.imageUrl || null,
+    color: catalog.color || item.color || null,
+  };
+}
+
 function validateCriteria(criteria) {
   for (const field of ["case", "style", "season", "weather", "lifestyle"]) {
     if (typeof criteria?.[field] !== "string" || !criteria[field].trim()) {
@@ -57,9 +75,14 @@ async function getOwnedOutfit(userId, outfitId) {
 
   const items = await OutfitItem.find({
     outfitId: outfit._id,
-  }).lean();
+  })
+    .populate("catalogId", "imageId imageUrl color")
+    .lean();
 
-  return { ...outfit, items };
+  return {
+    ...outfit,
+    items: items.map(mergeItemWithCatalog),
+  };
 }
 
 async function populateOutfitItems(outfit) {
@@ -69,9 +92,14 @@ async function populateOutfitItems(outfit) {
 
   const items = await OutfitItem.find({
     outfitId: outfit._id,
-  }).lean();
+  })
+    .populate("catalogId", "imageId imageUrl color")
+    .lean();
 
-  return { ...outfit.toObject(), items };
+  return {
+    ...outfit.toObject(),
+    items: items.map(mergeItemWithCatalog),
+  };
 }
 
 export async function createDraftOutfit(
@@ -124,12 +152,16 @@ export async function getOutfitHistory(userId) {
   const outfitIds = outfits.map((outfit) => outfit._id);
 
   const items = outfitIds.length
-    ? await OutfitItem.find({ outfitId: { $in: outfitIds } }).lean()
+    ? await OutfitItem.find({ outfitId: { $in: outfitIds } })
+        .populate("catalogId", "imageId imageUrl color")
+        .lean()
     : [];
 
   return outfits.map((outfit) => ({
     ...outfit,
-    items: items.filter((item) => item.outfitId.equals(outfit._id)),
+    items: items
+      .filter((item) => item.outfitId.equals(outfit._id))
+      .map(mergeItemWithCatalog),
   }));
 }
 
@@ -274,14 +306,18 @@ export async function getPublicOutfits({
   const outfitIds = outfits.map((outfit) => outfit._id);
 
   const items = outfitIds.length
-    ? await OutfitItem.find({ outfitId: { $in: outfitIds } }).lean()
+    ? await OutfitItem.find({ outfitId: { $in: outfitIds } })
+        .populate("catalogId", "imageId imageUrl color")
+        .lean()
     : [];
 
   const results = outfits.map((outfit) => ({
     ...outfit,
     user: outfit.userId,
     userId: outfit.userId?._id,
-    items: items.filter((item) => item.outfitId.equals(outfit._id)),
+    items: items
+      .filter((item) => item.outfitId.equals(outfit._id))
+      .map(mergeItemWithCatalog),
   }));
 
   return {
@@ -359,14 +395,18 @@ export async function getPublicOutfitsFeaturingItem({
   const items = relatedOutfitIds.length
     ? await OutfitItem.find({
         outfitId: { $in: relatedOutfitIds },
-      }).lean()
+      })
+        .populate("catalogId", "imageId imageUrl color")
+        .lean()
     : [];
 
   const results = outfits.map((outfit) => ({
     ...outfit,
     user: outfit.userId,
     userId: outfit.userId?._id,
-    items: items.filter((item) => item.outfitId.equals(outfit._id)),
+    items: items
+      .filter((item) => item.outfitId.equals(outfit._id))
+      .map(mergeItemWithCatalog),
   }));
 
   return {
