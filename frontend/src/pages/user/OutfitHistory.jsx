@@ -13,8 +13,6 @@ import "./OutfitHistory.css";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || "https://group-5-lookfit-csbu109-r11-khbc.onrender.com/api";
-// const API_BASE_URL =
-//   import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
 function getOutfitId(outfit) {
   return outfit?._id ?? outfit?.id ?? null;
@@ -411,64 +409,121 @@ export default function OutfitHistory() {
         )}
       </div>
 
-      {/* ================= MODAL XEM CHI TIẾT OUTFIT ================= */}
+      {/* ================= MODAL XEM CHI TIẾT OUTFIT (BREAKDOWN STYLE) ================= */}
       {selectedOutfit && (
         <div
           className="history-modal-overlay"
           onClick={() => setSelectedOutfit(null)}
         >
-          <section
-            className="history-modal"
+          <div
+            className="history-breakdown-modal"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="history-modal-media">
-              {getOutfitCover(selectedOutfit) ? (
-                <img
-                  className="history-modal-image"
-                  src={getOutfitCover(selectedOutfit)}
-                  alt="Outfit cover"
-                />
-              ) : (
-                <div className="history-modal-placeholder">LOOKFIT</div>
+            <button
+              type="button"
+              className="history-breakdown-close"
+              onClick={() => setSelectedOutfit(null)}
+              aria-label="Close"
+            >
+              <X size={18} />
+            </button>
+
+            <p className="history-breakdown-eyebrow">
+              {isDraft(selectedOutfit) ? "DRAFT LOOK" : "FINALIZED LOOK"} • OUTFIT BREAKDOWN
+            </p>
+
+            <h2 className="history-breakdown-title">
+              {selectedOutfit.name ||
+                (selectedOutfit.case
+                  ? `${selectedOutfit.case.charAt(0).toUpperCase() + selectedOutfit.case.slice(1)} Look`
+                  : "Outfit Details")}{" "}
+              <em>Pieces</em>
+            </h2>
+
+            <p className="history-breakdown-meta">
+              {selectedOutfit.bodyShape && (
+                <span>
+                  Body shape:{" "}
+                  <strong style={{ textTransform: "uppercase" }}>
+                    {selectedOutfit.bodyShape}
+                  </strong>{" "}
+                  ·{" "}
+                </span>
               )}
+              {selectedOutfit.case && (
+                <span>
+                  Occasion:{" "}
+                  <strong style={{ textTransform: "capitalize" }}>
+                    {selectedOutfit.case}
+                  </strong>{" "}
+                  ·{" "}
+                </span>
+              )}
+              {selectedOutfit.style && (
+                <span>
+                  Style:{" "}
+                  <strong style={{ textTransform: "capitalize" }}>
+                    {selectedOutfit.style}
+                  </strong>
+                </span>
+              )}
+            </p>
+
+            <div className="history-breakdown-items">
+              {(selectedOutfit.items || []).map((item, idx) => {
+                const imgUrl = getItemImageUrl(item);
+                const catalogId =
+                  item.catalogId?._id ??
+                  item.catalogId?.id ??
+                  item.catalogId ??
+                  item._id ??
+                  item.id;
+
+                return (
+                  <div className="history-breakdown-item" key={item._id || idx}>
+                    {imgUrl ? (
+                      <img
+                        src={imgUrl}
+                        alt={item.name}
+                        className="history-breakdown-item-img"
+                      />
+                    ) : (
+                      <div className="history-breakdown-item-placeholder">
+                        {item.category?.toUpperCase() || "ITEM"}
+                      </div>
+                    )}
+
+                    <div className="history-breakdown-item-info">
+                      <span className="history-breakdown-item-cat">
+                        {item.category}
+                        {item.color ? ` · ${item.color}` : ""}
+                      </span>
+                      <h4 className="history-breakdown-item-name">
+                        {item.name || "Unnamed Item"}
+                      </h4>
+                    </div>
+
+                    {catalogId && (
+                      <button
+                        type="button"
+                        className="history-breakdown-item-btn"
+                        onClick={() => navigate(`/catalog/${catalogId}`)}
+                      >
+                        View detail →
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
             </div>
 
-            <div className="history-modal-content">
-              <button
-                type="button"
-                className="history-modal-close"
-                onClick={() => setSelectedOutfit(null)}
-                aria-label="Close"
-              >
-                <X size={16} />
-              </button>
-
-              <p className="history-modal-eyebrow">
-                {isDraft(selectedOutfit) ? "DRAFT LOOK" : "FINALIZED LOOK"}
+            {formatSavedDate(selectedOutfit) && (
+              <p className="history-breakdown-date">
+                Saved on {formatSavedDate(selectedOutfit)}
               </p>
+            )}
 
-              <h2 className="history-modal-title">
-                {selectedOutfit.name || "Outfit Details"}
-              </h2>
-
-              <div className="history-modal-items">
-                <h3>Included items:</h3>
-                <ul>
-                  {(selectedOutfit.items || []).map((item, index) => (
-                    <li key={item._id || index}>
-                      <strong>{item.category?.toUpperCase()}:</strong> {item.name || "Item"}{" "}
-                      {item.color ? `(${item.color})` : ""}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {formatSavedDate(selectedOutfit) && (
-                <p className="history-modal-date">
-                  Saved on {formatSavedDate(selectedOutfit)}
-                </p>
-              )}
-
+            <div className="history-breakdown-footer">
               <button
                 type="button"
                 className="history-modal-button"
@@ -479,8 +534,15 @@ export default function OutfitHistory() {
               >
                 Find a similar look <ArrowRight size={17} />
               </button>
+              <button
+                type="button"
+                className="history-breakdown-close-btn"
+                onClick={() => setSelectedOutfit(null)}
+              >
+                Close
+              </button>
             </div>
-          </section>
+          </div>
         </div>
       )}
 

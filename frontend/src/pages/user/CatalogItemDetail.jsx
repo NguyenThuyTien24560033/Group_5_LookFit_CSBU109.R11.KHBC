@@ -1,8 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
+import { Heart } from "lucide-react";
 
 import { getCatalogProductById } from "../../services/catalog.service.js";
-import { getPublicOutfitsFeaturingItem } from "../../services/outfit.service.js";
+import {
+  getPublicOutfitsFeaturingItem,
+  createOutfit,
+  getOutfitHistory,
+} from "../../services/outfit.service.js";
 
 import "./CatalogItemDetail.css";
 
@@ -59,11 +64,33 @@ function getOutfitList(result) {
   return Array.isArray(outfits) ? outfits : [];
 }
 
+function getItemsSignature(items = []) {
+  return items
+    .map((item) =>
+      String(
+        item.catalogId?._id ??
+        item.catalogId?.id ??
+        item.catalogId ??
+        item._id ??
+        item.id ??
+        item.name ??
+        ""
+      )
+    )
+    .filter(Boolean)
+    .sort()
+    .join("-");
+}
+
 export default function CatalogItemDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const [product, setProduct] = useState(null);
   const [outfits, setOutfits] = useState([]);
+  const [savedOutfits, setSavedOutfits] = useState([]);
+  const [savingOutfitId, setSavingOutfitId] = useState(null);
+  const [saveMessage, setSaveMessage] = useState("");
 
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({
@@ -118,6 +145,84 @@ export default function CatalogItemDetail() {
       cancelled = true;
     };
   }, [id]);
+
+  // Load danh sách outfit đã lưu để thể hiện trạng thái tim hồng
+  useEffect(() => {
+    let cancelled = false;
+    async function loadSaved() {
+      try {
+        const res = await getOutfitHistory();
+        if (cancelled) return;
+        const list = Array.isArray(res) ? res : res?.outfits ?? [];
+        setSavedOutfits(list);
+      } catch {
+        // Chưa đăng nhập thì bỏ qua
+      }
+    }
+    loadSaved();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Lưu outfit thành Draft vào History
+  const handleSaveOutfitAsDraft = async (outfit) => {
+    const outfitId = outfit._id ?? outfit.id;
+    if (!outfit || savingOutfitId !== null) return;
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    setSavingOutfitId(outfitId);
+    setSaveMessage("");
+
+    try {
+      const currentSignature = getItemsSignature(outfit.items);
+      const alreadySaved = savedOutfits.some(
+        (saved) => getItemsSignature(saved.items) === currentSignature
+      );
+
+      if (alreadySaved) {
+        setSaveMessage("Outfit is already in your History.");
+        return;
+      }
+
+      const items = (outfit.items ?? []).map((item) => ({
+        id: String(
+          item.catalogId?._id ??
+          item.catalogId?.id ??
+          item.catalogId ??
+          item._id ??
+          item.id
+        ),
+      }));
+
+      if (items.length === 0 || items.some((it) => !it.id)) {
+        setSaveMessage("Invalid outfit items.");
+        return;
+      }
+
+      const criteria = {
+        case: outfit.case || "casual",
+        style: outfit.style || "casual",
+        season: outfit.season || "all-season",
+        weather: outfit.weather || "mild",
+        lifestyle: outfit.lifestyle || "everyday",
+      };
+
+      const res = await createOutfit(criteria, { items });
+      const created = res?.outfit ?? res;
+      setSavedOutfits((prev) => [created, ...prev]);
+      setSaveMessage("Outfit saved to your History as Draft!");
+    } catch (err) {
+      setSaveMessage(err?.message || "Failed to save outfit.");
+    } finally {
+      setSavingOutfitId(null);
+    }
+  };
 
   const loadRelatedOutfits = useCallback(async () => {
     let cancelled = false;
@@ -376,96 +481,133 @@ export default function CatalogItemDetail() {
           </div>
         )}
 
+        {saveMessage && (
+          <p className="catalog-save-message" role="status">
+            {saveMessage}
+          </p>
+        )}
+
         {!loadingOutfits && !outfitsError && outfits.length > 0 && (
           <>
             <div className="related-outfits-grid">
-              {outfits.map((outfit, outfitIndex) => (
-                <article
-                  className="related-outfit-card"
-                  key={outfit._id ?? outfit.id ?? outfitIndex}
-                >
-                  <div className="related-outfit-card-heading">
-                    <h3>Outfit</h3>
-                    <span className="related-outfit-status">Public</span>
-                  </div>
+              {outfits.map((outfit, outfitIndex) => {
+                const outfitId = outfit._id ?? outfit.id ?? outfitIndex;
+                const currentSignature = getItemsSignature(outfit.items);
+                const isSaved = savedOutfits.some(
+                  (saved) => getItemsSignature(saved.items) === currentSignature
+                );
 
-                  <p className="related-outfit-creator">
-                    Created by:{" "}
-                    {outfit.user?.name ||
-                      outfit.userId?.name ||
-                      "Unknown user"}
-                  </p>
+                return (
+                  <article
+                    className="related-outfit-card"
+                    key={outfitId}
+                  >
+                    <div className="related-outfit-card-heading">
+                      <h3>Outfit</h3>
+                      <span className="related-outfit-status">Public</span>
+                    </div>
 
-                  <div className="related-outfit-items">
-                    {Array.isArray(outfit.items) &&
-                    outfit.items.length > 0 ? (
-                      outfit.items.map((item, itemIndex) => {
-                        const imageUrl = getImageUrl(item);
-                        const itemCatalogId = getProductId(item);
-                        const isCurrentProduct =
-                          itemCatalogId === id ||
-                          String(item.catalogId?._id ?? item.catalogId ?? "") === id;
+                    <p className="related-outfit-creator">
+                      Created by:{" "}
+                      {outfit.user?.name ||
+                        outfit.userId?.name ||
+                        "Unknown user"}
+                    </p>
 
-                        const itemContent = (
-                          <>
-                            {imageUrl ? (
-                              <img
-                                src={imageUrl}
-                                alt={item.name || "Outfit item"}
-                                loading="lazy"
-                                referrerPolicy="no-referrer"
-                                onError={(event) => {
-                                  event.currentTarget.style.display = "none";
-                                }}
-                              />
-                            ) : (
-                              <div className="related-item-no-image">
-                                No image
-                              </div>
-                            )}
+                    <div className="related-outfit-items">
+                      {Array.isArray(outfit.items) &&
+                      outfit.items.length > 0 ? (
+                        outfit.items.map((item, itemIndex) => {
+                          const imageUrl = getImageUrl(item);
+                          const itemCatalogId = getProductId(item);
+                          const isCurrentProduct =
+                            itemCatalogId === id ||
+                            String(item.catalogId?._id ?? item.catalogId ?? "") === id;
 
-                            <span className="related-item-category">
-                              {item.category || "Item"}
-                            </span>
+                          const itemContent = (
+                            <>
+                              {imageUrl ? (
+                                <img
+                                  src={imageUrl}
+                                  alt={item.name || "Outfit item"}
+                                  loading="lazy"
+                                  referrerPolicy="no-referrer"
+                                  onError={(event) => {
+                                    event.currentTarget.style.display = "none";
+                                  }}
+                                />
+                              ) : (
+                                <div className="related-item-no-image">
+                                  No image
+                                </div>
+                              )}
 
-                            <span className="related-item-name">
-                              {item.name || "Unnamed item"}
-                            </span>
-
-                            {isCurrentProduct && (
-                              <span className="current-product-label">
-                                Current product
+                              <span className="related-item-category">
+                                {item.category || "Item"}
                               </span>
-                            )}
-                          </>
-                        );
 
-                        return (
-                          <div
-                            className="related-outfit-item"
-                            key={item._id ?? item.id ?? itemIndex}
-                          >
-                            {itemCatalogId && !isCurrentProduct ? (
-                              <Link
-                                to={`/catalog/${itemCatalogId}`}
-                                className="related-item-link"
-                              >
-                                {itemContent}
-                              </Link>
-                            ) : (
-                              <div className="related-item-content">
-                                {itemContent}
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })
-                    ) : (
-                      <p>No items in this outfit.</p>
-                    )}
-                  </div>
-                </article>
-              ))}
+                              <span className="related-item-name">
+                                {item.name || "Unnamed item"}
+                              </span>
+
+                              {isCurrentProduct && (
+                                <span className="current-product-label">
+                                  Current product
+                                </span>
+                              )}
+                            </>
+                          );
+
+                          return (
+                            <div
+                              className="related-outfit-item"
+                              key={item._id ?? item.id ?? itemIndex}
+                            >
+                              {itemCatalogId && !isCurrentProduct ? (
+                                <Link
+                                  to={`/catalog/${itemCatalogId}`}
+                                  className="related-item-link"
+                                >
+                                  {itemContent}
+                                </Link>
+                              ) : (
+                                <div className="related-item-content">
+                                  {itemContent}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })
+                      ) : (
+                        <p>No items in this outfit.</p>
+                      )}
+                    </div>
+
+                    {/* FOOTER: items count + Heart save button */}
+                    <div className="related-outfit-footer">
+                      <span className="related-outfit-count-label">
+                        {(outfit.items || []).length} items
+                      </span>
+
+                      <button
+                        type="button"
+                        className={`related-outfit-heart${isSaved ? " is-saved" : ""}`}
+                        onClick={() => handleSaveOutfitAsDraft(outfit)}
+                        disabled={savingOutfitId !== null}
+                        aria-label={isSaved ? "Saved to History" : "Save to History as Draft"}
+                        aria-pressed={isSaved}
+                        title={isSaved ? "Saved in History" : "Save to History as Draft"}
+                      >
+                        <Heart
+                          size={22}
+                          fill={isSaved ? "currentColor" : "none"}
+                          strokeWidth={2}
+                        />
+                      </button>
+                    </div>
+                  </article>
+                );
+              })}
             </div>
 
             {pagination.totalPages > 1 && (

@@ -374,6 +374,67 @@
 }
 
 /* =========================================
+   OUTFIT CARD FOOTER — Heart Save Button
+   ========================================= */
+
+.related-outfit-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--lf-border-light);
+}
+
+.related-outfit-count-label {
+  color: var(--lf-muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.related-outfit-heart {
+  width: 44px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: 1px solid #e8cbd8;
+  background: #fff9fb;
+  color: #b4507e;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+  padding: 0;
+}
+
+.related-outfit-heart:hover:not(:disabled) {
+  background: #fbe6ef;
+  transform: scale(1.08);
+}
+
+.related-outfit-heart.is-saved {
+  background: #fbe6ef;
+  color: #b4507e;
+}
+
+.related-outfit-heart:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.catalog-save-message {
+  margin: 12px 0;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: #fff0f6;
+  color: #a54673;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: center;
+}
+
+/* =========================================
    STATUS, ERROR & EMPTY STATES
    ========================================= */
 
